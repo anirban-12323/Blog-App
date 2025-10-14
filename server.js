@@ -1,12 +1,44 @@
 const express=require("express")
+const mongoose=require("mongoose")
+const cors=require("cors")
 const app=express()
+
+//anirbanguharoy82_db_user
+//hIMRYw8OSzj1K7PY
+
 app.use(express.json())
+app.use(cors())
+async function dbConected(){
+  try {
+    await mongoose.connect("mongodb+srv://anirbanguharoy82_db_user:hIMRYw8OSzj1K7PY@cluster0.804al0f.mongodb.net/Blogdatabase")
+    console.log("DB conected successfully")
+    
+  } catch (error) {
+    console.log("error aa gaya while conecting DB")
+    console.log(error)
+    
+  }
+
+}
+
+const userSchema=new mongoose.Schema({
+  name:String,
+  email:{
+    type:String,
+    unique:true
+
+  },
+  password:String
+})
+
+const User=mongoose.model("User",userSchema)
 
 //USER ROUTES
-let users=[]
-app.post("/users",(req,res)=>{
+
+app.post("/users",async(req,res)=>{
   const{name,email,password}=req.body
   try {
+   
     
     if(!name){
       return res.status(400).json({
@@ -27,17 +59,31 @@ app.post("/users",(req,res)=>{
       })
     }
 
-    users.push({...req.body,id:users.length+1})
+    const chekedforexitingUser= await User.findOne({email})
+    if(chekedforexitingUser){
+      return res.status(400).json({
+        success:false,
+        message:"User already registered with this email"
+      })
+    }
+
+  const newUser=await User.create({
+    name,
+    email,
+    password
+  })
     return res.status(200).json({
       success:true,
-      message:"User created successfully"
+      message:"User created successfully",
+      newUser
     })
     
   } catch (error) {
 
     return res.status(400).json({
       success:false,
-      message:"Please try again"
+      message:"Please try again",
+      error:error.message
 
     })
     
@@ -198,4 +244,8 @@ app.delete("/blogs/:id",(req,res)=>{
 
 app.listen(3000,()=>{
   console.log("Server started")
+  dbConected()
 })
+
+
+//
