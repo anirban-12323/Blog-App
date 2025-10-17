@@ -91,8 +91,12 @@ app.post("/users",async(req,res)=>{
 
 })
 
-app.get("/users",(req,res)=>{
+app.get("/users",async(req,res)=>{
   try {
+
+
+    const users= await User.find({})
+
     
     return res.status(200).json({
       success:true,
@@ -111,15 +115,23 @@ app.get("/users",(req,res)=>{
 })
 
 
-app.get("/users/:id",(req,res)=>{
+app.get("/users/:id",async (req,res)=>{
+  
+
+  
 
   try {
-    const user=users.filter(user=>user.id==req.params.id)
-    if(user.length==0){
+      const id=req.params.id
+    const user= await User.findById({_id:id})
+ 
+
+  
+    
+    if(!user){
       return res.status(400).json({
       success:false,
       message:"user not found",
-      user
+      
     })
 
     }
@@ -140,20 +152,34 @@ app.get("/users/:id",(req,res)=>{
 
 })
 
-app.patch("/users/:id",(req,res)=>{
+app.patch("/users/:id",async(req,res)=>{
   
   try {
-    const{id}=req.params
-    let updatedUser=users.map((user,index)=>user.id==id?({...users[index],...req.body}):user)
-    users=[...updatedUser]
+   const id=req.params.id
+   const{name,password,email}=req.body
+
+   const UpdateUser= await User.findByIdAndUpdate(id,{name,password,email},{new:true})
+   
+   if(!UpdateUser){
+      return res.status(400).json({
+      success:false,
+      message:"user not found",
+      
+    })
+
+    }
     return res.status(200).json({
       success:true,
       message:"user updated successfully",
-      updatedUser})
+     UpdateUser
+    })
+    
+    
     
   } catch (error) {
     return res.status(400).json({
       success:false,
+      error:error.message,
       message:"error during user update"
 
     })
@@ -162,18 +188,29 @@ app.patch("/users/:id",(req,res)=>{
   }
 })
 
-app.delete("/users/:id",(req,res)=>{
+app.delete("/users/:id",async(req,res)=>{
  
 
    try {
-     const{id}=req.params
-     let deleteUser=users.filter(user=>user.id!=id)
-     users=[...deleteUser]
-     return res.status(200).json({
+    const id=req.params.id
+   const{name,password,email}=req.body
+
+   const deletedUser= await User.findByIdAndUpdate(id)
+   
+   if(!deletedUser){
+      return res.status(400).json({
+      success:false,
+      message:"user not found",
+      
+    })
+
+    }
+    return res.status(200).json({
       success:true,
       message:"user deleted successfully",
-      users
-     })
+     deletedUser
+    })
+     
     
    } catch (error) {
     return res.status(400).json({
