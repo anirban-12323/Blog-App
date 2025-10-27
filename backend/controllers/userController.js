@@ -24,7 +24,7 @@ async function  createUser(req,res){
       })
     }
 
-    const chekedforexitingUser= await Userer.findOne({email})
+    const chekedforexitingUser= await User.findOne({email})
     if(chekedforexitingUser){
       return res.status(400).json({
         success:false,
