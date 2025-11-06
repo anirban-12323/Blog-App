@@ -1,20 +1,30 @@
 const Blog=require("../models/blogSchema")
+const User=require("../models/userSchema")
 
 async function createBlog(req,res){
  
   try {
 
-    const{title,description,draft}=req.body
+    const{title,description,draft,creator}=req.body
     if(!title||!description){
       return res.status(400).json({
       message:"please fill all the fields",
    
     })
+    
+
 
 
     }
+    const findUser=await User.findById(creator)
+    if(!findUser){
+      return res.status(500).json({
+        message:"kon hei vai tu mei tuje nahi janta"
+      })
+    }
 
-    const blog=await Blog.create({title,description,draft})
+    const blog=await Blog.create({title,description,draft,creator})
+    await User.findByIdAndUpdate(creator,{$push:{blogs:blog._id}})
 
     return res.status(200).json({
       message:"Blog created successfully",
@@ -33,7 +43,11 @@ async function createBlog(req,res){
 async function getBlogs(req,res){
 
   try {
-    const blogs=await Blog.find({draft:false})
+    // const blogs=await Blog.find({draft:false}).populate("creator")
+     const blogs=await Blog.find({draft:false}).populate({
+      path:"creator",
+      select:"name"
+     })
     
     return res.status(200).json({
       message:"Blogs fetch successfully",
