@@ -1,6 +1,6 @@
 const express=require("express")
 
-const { createUser, getUser, getUserBYID, updateUser, deleteUserByID } = require("../controllers/userController");
+const { createUser, getUser, getUserBYID, updateUser, deleteUserByID ,login} = require("../controllers/userController");
 
 
 
@@ -9,6 +9,7 @@ const route=express.Router()
 
 
 route.post("/users",createUser)
+route.post("/login",login)
 
 route.get("/users",getUser)
 

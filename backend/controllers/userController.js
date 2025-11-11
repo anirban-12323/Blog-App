@@ -1,4 +1,5 @@
 const User = require("../models/userSchema")
+const bcrypt=require("bcrypt")
 
 async function  createUser(req,res){
   const{name,email,password}=req.body
@@ -32,10 +33,13 @@ async function  createUser(req,res){
       })
     }
 
+    const hashPass= await bcrypt.hash(password,12)
+  
+
   const newUser=await User.create({
     name,
     email,
-    password
+    password: hashPass
   })
     return res.status(200).json({
       success:true,
@@ -53,6 +57,68 @@ async function  createUser(req,res){
     })
     
   }
+
+}
+
+async function login(req,res){
+   const{email,password}=req.body
+  try {
+   
+    
+    
+     if(!password){
+      return res.status(400).json({
+        success:false,
+        message:"Please enter password"
+      })
+    }
+     if(!email){
+      return res.status(400).json({
+        success:false,
+        message:"Please enter email"
+      })
+    }
+
+    const chekedforexitingUser= await User.findOne({email})
+    if(!chekedforexitingUser){
+      return res.status(400).json({
+        success:false,
+        message:"User not exists"
+      })
+    }
+
+    let checkForPass=await bcrypt.compare(password,chekedforexitingUser.password)
+
+    if(!checkForPass){
+      return res.status(400).json({
+        success:false,
+        message:"Incorrect Password"
+      })
+    }
+
+
+     
+  
+  
+
+ 
+    return res.status(200).json({
+      success:true,
+      message:"logged in successfully",
+     chekedforexitingUser
+    })
+    
+  } catch (error) {
+
+    return res.status(400).json({
+      success:false,
+      message:"Please try again",
+      error:error.message
+
+    })
+    
+  }
+
 
 }
 
@@ -187,4 +253,4 @@ async function deleteUserByID(req,res){
     
    }
 }
-module.exports={createUser,getUser,getUserBYID,updateUser,deleteUserByID}
+module.exports={createUser,getUser,getUserBYID,updateUser,deleteUserByID,login}
