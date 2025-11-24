@@ -5,6 +5,7 @@ const {generateJWT} = require("../utils/generateToken")
 async function  createUser(req,res){
   const{name,email,password}=req.body
   try {
+    
    
     
     if(!name){

@@ -5,26 +5,33 @@ const {verifyJWT} = require("../utils/generateToken")
 async function createBlog(req,res){
  
   try {
-    let isValid= await verifyJWT(req.body.token)
+    
+    let token = req.headers.authorization?.split(" ")[1];
+let isValid = await verifyJWT(token);
+
     // console.log(isValid)
+    console.log(isValid)
 
     if(!isValid){
-      return res.status(200).json({
+      return res.status(400).json({
+
         message:"Invalid token"
       })
     }
-
-    const{title,description,draft,creator}=req.body
-    if(!title||!description){
+    const creator=isValid.id
+    const{title,description,draft}=req.body
+    if(!title){
       return res.status(400).json({
-      message:"please fill all the fields",
+      message:"please fill title  field",
    
     })
-    
-
-
-
+    if(!description){
+      return res.status(400).json({
+        message:"please fill description field"
+      })
     }
+    }
+    
     const findUser=await User.findById(creator)
     if(!findUser){
       return res.status(500).json({
@@ -92,6 +99,45 @@ async function getBlog(req,res){
 }
 
 async function updateBlog(req,res){
+  try {
+    const creator=req.user
+
+    const {id}=req.params
+    const{title,description,draft}=req.body
+    console.log("REQ BODY →", req.body);
+
+    const user=await User.findById(creator).select("-password")
+    // console.log(user.blogs.find(blogId=>blogId===id))
+    // 
+
+    const blog=await Blog.findById(id)
+    console.log(creator,blog.creator)
+    //blog.creator is a OBJECTID AND CREATOR IS STRING 
+    if(!blog.creator.equals(creator)){
+      return res.status(500).json({
+        message:"You are not authorized for this action"
+      })
+
+     }
+
+     const updatedBlog=await Blog.updateOne({_id:id},{
+      title,
+      description,
+      draft
+
+     },{new:true})
+     return res.status(200).json({
+      success:true,
+      message:"Blog updated successfully",
+      blog:updatedBlog
+     })
+    // // const blog= await Blog.findByIdAndUpdate(blogId,{title,description,draft})
+    
+  } catch (error) {
+    console.log(error)
+    
+  }
+
 
 }
 

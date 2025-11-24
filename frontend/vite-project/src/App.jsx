@@ -3,79 +3,22 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+import Signup from "./pages/signup";
+import CreateBlogs from "./components/createBlogs";
+import Blogs from "./components/blogs";
+import Signin from "./pages/signin";
 
 function App() {
-  const [userData, setuserData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [blogs, setBlogs] = useState([]);
-  async function fetchBlogs() {
-    let data = await fetch("http://localhost:3000/api/v1/blogs");
-    let res = await data.json();
-    console.log(res.blogs);
-    setBlogs(res.blogs);
-  }
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-  async function handleSubmit() {
-    let data = await fetch("http://localhost:3000/api/v1/users", {
-      method: "POST",
-      body: JSON.stringify(userData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    let res = await data.json();
-    alert(res.message);
-  }
-
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <div>
-        <input
-          onChange={(e) =>
-            setuserData((prev) => ({ ...prev, name: e.target.value }))
-          }
-          type="text "
-          placeholder="name"
-          name=""
-          id=""
-        />
-        <br />
-        <br />
-        <input
-          onChange={(e) =>
-            setuserData((prev) => ({ ...prev, email: e.target.value }))
-          }
-          type="text"
-          placeholder="email"
-          name=""
-          id=""
-        />
-        <br />
-        <br />
-        <input
-          onChange={(e) =>
-            setuserData((prev) => ({ ...prev, password: e.target.value }))
-          }
-          type="text "
-          placeholder="password"
-          name=""
-          id=""
-        />
-      </div>
-      <br />
-      <button onClick={handleSubmit}>Submit</button>
-      {blogs.map((blog) => (
-        <ul>
-          <li>{blog.title}</li>
-        </ul>
-      ))}
-    </div>
+    <Routes>
+      <Route path="/" element={<Blogs />}></Route>
+      <Route path="/signup" element={<Signup />}></Route>
+      <Route path="/signin" element={<Signin />}></Route>
+
+      <Route path="/create-blog" element={<CreateBlogs />}></Route>
+      <Route path="*" element={<h1>kya kar raha hei bhai tu</h1>}></Route>
+    </Routes>
   );
 }
 

@@ -1,21 +1,27 @@
-const jwt=require("jsonwebtoken")
- async function generateJWT(payload){
-  let token=await jwt.sign(payload,"jwtbohutjaydakhatarnakscerethei")
-  return token
+const jwt = require("jsonwebtoken");
 
+
+const JWT_SECRET="jsonwebtokenbhutkhatarnakhei"
+
+async function generateJWT(payload) {
+  let token = await jwt.sign(payload, JWT_SECRET);
+  return token;
 }
 
-async function verifyJWT(token){
+async function verifyJWT(token) {
   try {
-     let isValid=await jwt.verify(token,"jwtbohutjaydakhatarnakscerethei")
-  return  true
+    let data = await jwt.verify(token, JWT_SECRET);
+    
 
-    
-  } catch (error) {
-   return false;
-    
+    return data;
+  } catch (err) {
+    return false;
   }
-
- 
 }
-module.exports ={generateJWT,verifyJWT}
+
+async function decodeJWT(token) {
+  let decoded = await jwt.decode(token);
+  return decoded;
+}
+
+module.exports = { generateJWT, verifyJWT, decodeJWT };
