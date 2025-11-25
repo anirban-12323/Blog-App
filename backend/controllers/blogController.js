@@ -2,60 +2,60 @@ const Blog=require("../models/blogSchema")
 const User=require("../models/userSchema")
 const {verifyJWT} = require("../utils/generateToken")
 
-async function createBlog(req,res){
- 
+async function createBlog(req, res) {
   try {
-    
+    console.log("createblog controller called")
     let token = req.headers.authorization?.split(" ")[1];
-let isValid = await verifyJWT(token);
+    let isValid = await verifyJWT(token);
 
-    // console.log(isValid)
-    console.log(isValid)
+    if (!isValid) {
+      return res.status(400).json({
+        message: "Invalid token",
+      });
+    }
 
-    if(!isValid){
-      return res.status(400).json({
+    const creator = isValid.id;
+    const { title, description, draft } = req.body;
+    console.log("title",title)
+    console.log("description",description)
+    console.log("draft",draft)
 
-        message:"Invalid token"
-      })
-    }
-    const creator=isValid.id
-    const{title,description,draft}=req.body
-    if(!title){
+    if (!title) {
       return res.status(400).json({
-      message:"please fill title  field",
-   
-    })
-    if(!description){
+        message: "please fill title field",
+      });
+    }
+
+    if (!description) {
       return res.status(400).json({
-        message:"please fill description field"
-      })
+        message: "please fill description field",
+      });
     }
-    }
-    
-    const findUser=await User.findById(creator)
-    if(!findUser){
+
+    const findUser = await User.findById(creator);
+     console.log("Found user:", findUser);
+    if (!findUser) {
       return res.status(500).json({
-        message:"kon hei vai tu mei tuje nahi janta"
-      })
+        message: "kon hei vai tu mei tuje nahi janta",
+      });
     }
 
-    const blog=await Blog.create({title,description,draft,creator})
-    await User.findByIdAndUpdate(creator,{$push:{blogs:blog._id}})
+    const blog = await Blog.create({ title, description, draft, creator });
+    console.log("Blog created:", blog);
+    await User.findByIdAndUpdate(creator, { $push: { blogs: blog._id } });
+    console.log("User updated!");
 
     return res.status(200).json({
-      message:"Blog created successfully",
-      blog
-    })
-    
+      message: "Blog created successfully",
+      blog,
+    });
   } catch (error) {
     return res.status(500).json({
-      message:error.message,
-      
-    })
-
-    
+      message: error.message,
+    });
   }
 }
+
 async function getBlogs(req,res){
 
   try {
@@ -104,14 +104,14 @@ async function updateBlog(req,res){
 
     const {id}=req.params
     const{title,description,draft}=req.body
-    console.log("REQ BODY →", req.body);
+    
 
     const user=await User.findById(creator).select("-password")
     // console.log(user.blogs.find(blogId=>blogId===id))
     // 
 
     const blog=await Blog.findById(id)
-    console.log(creator,blog.creator)
+    
     //blog.creator is a OBJECTID AND CREATOR IS STRING 
     if(!blog.creator.equals(creator)){
       return res.status(500).json({
@@ -120,30 +120,79 @@ async function updateBlog(req,res){
 
      }
 
-     const updatedBlog=await Blog.updateOne({_id:id},{
-      title,
-      description,
-      draft
+    //  const updatedBlog=await Blog.updateOne({_id:id},{
+    //   title,
+    //   description,
+    //   draft
 
-     },{new:true})
+    //  },{new:true})
+
+    blog.title=title ||  blog.title,
+    blog.description=description || blog.description,
+    blog.draft=draft || blog.draft
+
+    await blog.save()
      return res.status(200).json({
       success:true,
       message:"Blog updated successfully",
-      blog:updatedBlog
+      blog
      })
     // // const blog= await Blog.findByIdAndUpdate(blogId,{title,description,draft})
     
   } catch (error) {
-    console.log(error)
+    message:error.message
     
   }
 
 
 }
 
-async function deleteBlog(req,res){
+async function deleteBlog(req, res) {
+  try {
+    const creator = req.user;
+    console.log("Creator:", creator);
 
+    const { id } = req.params;
+
+    const blog=Blog.findById(id)
+    if(!blog){
+      return res.status(500).json({
+        success:false,
+        message:"blog not found"
+      })
+    }
+     if(!blog.creator.equals(creator)){
+      return res.status(500).json({
+        message:"You are not authorized for this action"
+      })
+
+     }
+
+
+    // 1. Delete the blog
+    await Blog.findByIdAndDelete(id);
+
+    // 2. Remove it from the user's blogs list
+    await User.findByIdAndUpdate(
+      creator,
+      { $pull: { blogs: id } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog deleted successfully"
+    });
+
+  } catch (error) {
+    console.log("DELETE ERROR:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 }
+
 
 module.exports={createBlog, getBlogs,getBlog,updateBlog,deleteBlog}
 

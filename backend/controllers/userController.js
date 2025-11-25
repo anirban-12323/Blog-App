@@ -49,7 +49,7 @@ async function  createUser(req,res){
 
   let token=await generateJWT({
     email:newUserObj.email,
-    id:newUserObj._id
+    id:newUserObj._id.toString()
   })
     return res.status(200).json({
       success:true,
@@ -113,7 +113,7 @@ async function login(req,res){
   
      let token=await generateJWT({
     email:chekedforexitingUser.email,
-    id:chekedforexitingUser._id
+    id:chekedforexitingUser._id.toString()
   })
 
  

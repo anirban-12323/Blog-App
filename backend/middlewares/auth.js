@@ -15,6 +15,7 @@ const verifyUser = async (req, res, next) => {
 
         try {
             let user = await verifyJWT(token);
+            
             if (!user) {
                 return res.status(400).json({
                     success: false,
@@ -22,6 +23,8 @@ const verifyUser = async (req, res, next) => {
                 });
             }
             req.user = user.id;
+            console.log(req.user)
+
             next();
         } catch (err) {}
     } catch (err) {

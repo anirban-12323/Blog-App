@@ -15,6 +15,6 @@ route.get("/blogs/:id",getBlog)
 
 route.patch("/blogs/:id",verifyUser,updateBlog)
 
-route.delete("/blogs/:id",deleteBlog)
+route.delete("/blogs/:id",verifyUser,deleteBlog)
 
 module.exports=route
