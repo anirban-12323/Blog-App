@@ -16,7 +16,17 @@ const blogSchema=new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:"User",
     required:true
-  }
+  },
+
+  likes:[{
+     type:mongoose.Schema.ObjectId,
+     ref:"User"
+
+  }],
+  dislikes:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"User"
+  }]
 },
 {timestamps:true}
 );

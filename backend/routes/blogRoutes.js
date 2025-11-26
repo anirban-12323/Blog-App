@@ -1,7 +1,7 @@
 const express=require("express")
 
 
-const{createBlog,getBlogs,getBlog,updateBlog,deleteBlog}=require("../controllers/blogController")
+const{createBlog,getBlogs,getBlog,updateBlog,deleteBlog,dislikeBlog,likeBlog}=require("../controllers/blogController")
 
 
 const verifyUser=require("../middlewares/auth")
@@ -16,5 +16,6 @@ route.get("/blogs/:id",getBlog)
 route.patch("/blogs/:id",verifyUser,updateBlog)
 
 route.delete("/blogs/:id",verifyUser,deleteBlog)
-
+route.post("/blogs/:id/like",verifyUser,likeBlog)
+route.post("/blogs/:id/dislike",verifyUser,dislikeBlog)
 module.exports=route

@@ -147,6 +147,99 @@ async function updateBlog(req,res){
 
 }
 
+
+async function likeBlog(req,res){
+  try {
+   const userId=req.user
+   const {id}=req.params
+   const blog= await Blog.findById(id)
+   if(!blog){
+    return res.status(404).json({
+      message:"blog not found"
+    })
+   }
+
+   //if already like , remove like
+
+   if(blog.likes.includes(userId)){
+    await Blog.findByIdAndUpdate(id, {
+      $pull:{likes:userId}
+
+    })
+    return res.status(200).json({
+      message:"liked removed"
+    })
+
+   }
+
+   //dislike before remove dislike
+
+   await Blog.findByIdAndUpdate(id,{
+    $pull:{
+      dislikes:userId
+    }
+   })
+
+   //add like
+
+   await Blog.findByIdAndUpdate(id,{
+    $addToSet:{likes:userId}
+   })
+   return res.status(200).json({
+    message:"Blog Liked"
+   })
+
+    
+  } catch (error) {
+    return res.status(400).json({
+      message:error.message
+    })
+    
+  }
+}
+
+async function dislikeBlog(req,res){
+  try {
+    const userId=req.user
+    const {id}=req.params
+    const blog=Blog.findById(id)
+    if(!blog){
+      return res.json({
+        message:"Blog not found"
+      })
+    }
+
+    //if already dislike remove dislike
+    if(blog.dislikes.includes(userId)){
+      await Blog.findByIdAndUpdate(id,{
+        $pull:{dislikes:userId}
+      })
+      return res.json({
+        message:"dislike removed"
+      })
+    }
+
+    //remove like
+
+    await Blog.findByIdAndUpdate(id,{
+      $pull:{likes:userId}
+    })
+
+    await Blog.findByIdAndUpdate(id,{
+      $addToSet:{dislikes:userId}
+    })
+    return res.json({
+      message:"dislike added"
+    })
+    
+  } catch (error) {
+    return res.json({
+      message:error.message
+    })
+    
+  }
+}
+
 async function deleteBlog(req, res) {
   try {
     const creator = req.user;
@@ -194,7 +287,7 @@ async function deleteBlog(req, res) {
 }
 
 
-module.exports={createBlog, getBlogs,getBlog,updateBlog,deleteBlog}
+module.exports={createBlog, getBlogs,getBlog,updateBlog,deleteBlog,likeBlog,dislikeBlog}
 
 
 
