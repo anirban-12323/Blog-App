@@ -1,4 +1,5 @@
 const express=require("express")
+const upload=require("../utils/multer")
 
 
 const{createBlog,getBlogs,getBlog,updateBlog,deleteBlog,dislikeBlog,likeBlog}=require("../controllers/blogController")
@@ -7,7 +8,7 @@ const{createBlog,getBlogs,getBlog,updateBlog,deleteBlog,dislikeBlog,likeBlog}=re
 const verifyUser=require("../middlewares/auth")
 const route=express.Router()
 
-route.post("/blogs",verifyUser,createBlog)
+route.post("/blogs",verifyUser,upload.single("image"),createBlog)
 route.get("/blogs",getBlogs)
 route.get("/blogs/:id",getBlog)
 

@@ -34,9 +34,10 @@ async function addComment(req,res){
 async function getComments(req,res){
   try {
     const{id}=req.params
-    const comments=Comment.find({blogId:id})
+    const comments= await Comment.find({blogId:id})
     .populate("user","name email")
-    .sort({createdAt:-1});
+    .sort({createdAt:-1})
+  .lean();
     return res.status(200).json({
       message: "Comments fetched success",
       comments
@@ -44,8 +45,11 @@ async function getComments(req,res){
 
     
   } catch (error) {
+    console.log(error)
+    
     return res.status(500).json({
-      message:error.message
+    message:error.message
+     
     })
     
   }

@@ -1,10 +1,12 @@
 const Blog=require("../models/blogSchema")
 const User=require("../models/userSchema")
-const {verifyJWT} = require("../utils/generateToken")
+const {verifyJWT} = require("../utils/generateToken");
+const {uploadImage,deleteImagefromCloudinary} = require("../utils/uploadImage");
+const fs=require("fs")
 
 async function createBlog(req, res) {
   try {
-    console.log("createblog controller called")
+    
     let token = req.headers.authorization?.split(" ")[1];
     let isValid = await verifyJWT(token);
 
@@ -16,9 +18,9 @@ async function createBlog(req, res) {
 
     const creator = isValid.id;
     const { title, description, draft } = req.body;
-    console.log("title",title)
-    console.log("description",description)
-    console.log("draft",draft)
+    const image=req.file
+    console.log({ title, description, draft,image})
+   
 
     if (!title) {
       return res.status(400).json({
@@ -33,14 +35,20 @@ async function createBlog(req, res) {
     }
 
     const findUser = await User.findById(creator);
-     console.log("Found user:", findUser);
+     
     if (!findUser) {
       return res.status(500).json({
         message: "kon hei vai tu mei tuje nahi janta",
       });
     }
 
-    const blog = await Blog.create({ title, description, draft, creator });
+    const {secure_url,public_id}=await uploadImage(image.path)
+    fs.unlinkSync(image.path)
+   
+
+    
+
+    const blog = await Blog.create({ title, description, draft, creator,image:secure_url,imageId:public_id });
     console.log("Blog created:", blog);
     await User.findByIdAndUpdate(creator, { $push: { blogs: blog._id } });
     console.log("User updated!");
@@ -260,6 +268,7 @@ async function deleteBlog(req, res) {
       })
 
      }
+     await deleteImagefromCloudinary(blog.imageId)
 
 
     // 1. Delete the blog
