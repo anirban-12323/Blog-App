@@ -54,14 +54,14 @@ async function  createUser(req,res){
     return res.status(200).json({
       success:true,
       message:"User created successfully",
-      user:newUserObj,
+      user:{name:newUserObj.name,email:newUserObj.email},
       token
 
     })
     
   } catch (error) {
 
-    return res.status(400).json({
+    return res.status(500).json({
       success:false,
       message:"Please try again",
       error:error.message
@@ -120,14 +120,17 @@ async function login(req,res){
     return res.status(200).json({
       success:true,
       message:"logged in successfully",
-      user:chekedforexitingUser,
+      user:{name:chekedforexitingUser.name,
+        email:chekedforexitingUser.email,
+        id:chekedforexitingUser._id
+      },
       token
 
     })
     
   } catch (error) {
 
-    return res.status(400).json({
+    return res.status(500).json({
       success:false,
       message:"Please try again",
       error:error.message

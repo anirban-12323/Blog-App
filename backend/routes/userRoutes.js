@@ -9,7 +9,7 @@ const route=express.Router()
 
 
 route.post("/signup",createUser)
-route.post("/login",login)
+route.post("/signin",login)
 
 route.get("/users",getUser)
 
