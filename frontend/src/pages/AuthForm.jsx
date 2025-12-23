@@ -37,7 +37,7 @@ function AuthForm({ type }) {
     }
   }
   return (
-    <div className=" border border-black w-[20%] flex flex-col items-center gap-5 mt-35">
+    <div className="  w-[20%] flex flex-col items-center gap-5 mt-35">
       <h1 className="text-3xl">{type === "signin" ? "Sign in" : "Sign up"}</h1>
 
       <form
