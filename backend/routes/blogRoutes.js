@@ -10,7 +10,7 @@ const route=express.Router()
 
 route.post("/blogs",verifyUser,upload.single("image"),createBlog)
 route.get("/blogs",getBlogs)
-route.get("/blogs/:id",getBlog)
+route.get("/blogs/:blogId",getBlog)
 
 
 

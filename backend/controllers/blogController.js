@@ -3,6 +3,7 @@ const User=require("../models/userSchema")
 const {verifyJWT} = require("../utils/generateToken");
 const {uploadImage,deleteImagefromCloudinary} = require("../utils/uploadImage");
 const fs=require("fs")
+const uniqid=require("uniqid")
 
 async function createBlog(req, res) {
   try {
@@ -44,11 +45,12 @@ async function createBlog(req, res) {
 
     const {secure_url,public_id}=await uploadImage(image.path)
     fs.unlinkSync(image.path)
-   
+    const blogId=title.toLowerCase().split(" ").join("-")+ "-" + uniqid()
+    
 
     
 
-    const blog = await Blog.create({ title, description, draft, creator,image:secure_url,imageId:public_id });
+    const blog = await Blog.create({ title, description, draft, creator,image:secure_url,imageId:public_id ,blogId});
     console.log("Blog created:", blog);
     await User.findByIdAndUpdate(creator, { $push: { blogs: blog._id } });
     console.log("User updated!");
@@ -88,8 +90,11 @@ async function getBlogs(req,res){
 }
 async function getBlog(req,res){
   try {
-    const {id}=req.params
-    const blog=await Blog.findById(id)
+    const {blogId}=req.params
+    const blog=await Blog.findOne({blogId}).populate({
+      path:"creator",
+      select:"name email"
+    })
     return res.status(200).json({
       message:"Blog fetch successfully",
       blog

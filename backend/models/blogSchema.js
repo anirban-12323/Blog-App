@@ -12,6 +12,12 @@ const blogSchema=new mongoose.Schema({
     type:Boolean,
     default:false
   },
+  blogId:{
+    type:String,
+    required:true,
+    unique:true
+
+  },
   creator:{
     type:mongoose.Schema.Types.ObjectId,
     ref:"User",
