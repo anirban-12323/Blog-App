@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function HomePage() {
   const [blogs, setBlogs] = useState([]);
   async function fetchBlogs() {
-    let res = await axios.get("http://localhost:3000/api/v1/blogs");
+    let res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/blogs`);
     console.log(res.data.blogs);
     setBlogs(res.data.blogs);
   }

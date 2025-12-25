@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config()
 
 
-const JWT_SECRET="jsonwebtokenbhutkhatarnakhei"
+const JWT_SECRET=process.env.JWT_SECRET
 
 async function generateJWT(payload) {
   let token = await jwt.sign(payload, JWT_SECRET);

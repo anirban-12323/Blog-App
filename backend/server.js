@@ -8,6 +8,10 @@ const userRoute=require("./routes/userRoutes")
 const blogRoute=require("./routes/blogRoutes")
 const commentRoute=require("./routes/commentRoutes")
 
+require("dotenv").config()
+const PORT=process.env.PORT
+
+
 
 
 //anirbanguharoy82_db_user
@@ -29,7 +33,7 @@ app.use("/api/v1",commentRoute)
 
 
 
-app.listen(3000,()=>{
+app.listen(PORT,()=>{
   console.log("Server started")
   dbConect()
   cloudinaryConfig()

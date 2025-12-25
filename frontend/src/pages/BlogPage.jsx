@@ -8,7 +8,9 @@ function BlogPage() {
   const [blogData, setBlogData] = useState(null);
   async function fetchBlogById() {
     try {
-      let res = await axios.get(`http://localhost:3000/api/v1/blogs/${id}`);
+      let res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`
+      );
       setBlogData(res.data.blog);
     } catch (error) {
       toast.error(error);
