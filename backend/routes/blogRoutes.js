@@ -14,7 +14,7 @@ route.get("/blogs/:blogId",getBlog)
 
 
 
-route.patch("/blogs/:id",verifyUser,updateBlog)
+route.patch("/blogs/:id",verifyUser,upload.single("image"),updateBlog)
 
 route.delete("/blogs/:id",verifyUser,deleteBlog)
 route.post("/blogs/:id/like",verifyUser,likeBlog)

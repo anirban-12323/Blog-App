@@ -21,19 +21,25 @@ async function createBlog(req, res) {
     const { title, description, draft } = req.body;
     const image=req.file
     console.log({ title, description, draft,image})
-   
+   if(!title && ! description){
+     return res.status(400).json({
+        message: "please fill all the field",
+      });
 
-    if (!title) {
+   }
+   
+    else if (!title) {
       return res.status(400).json({
         message: "please fill title field",
       });
     }
 
-    if (!description) {
+   else  if (!description) {
       return res.status(400).json({
         message: "please fill description field",
       });
     }
+
 
     const findUser = await User.findById(creator);
      
@@ -91,10 +97,27 @@ async function getBlogs(req,res){
 async function getBlog(req,res){
   try {
     const {blogId}=req.params
-    const blog=await Blog.findOne({blogId}).populate({
+    const blog=await Blog.findOne({blogId})
+    // .populate({
+    //   path:"comments",
+    //   populate:{
+    //     path:"user",
+    //     select:"name email"
+    //   }
+
+      
+   // })
+   .populate({
       path:"creator",
       select:"name email"
     })
+    if(!blog){
+       return res.status(404).json({
+      message:"Blog not found",
+      
+    })
+      
+    }
     return res.status(200).json({
       message:"Blog fetch successfully",
       blog
@@ -117,13 +140,14 @@ async function updateBlog(req,res){
 
     const {id}=req.params
     const{title,description,draft}=req.body
+     const image=req.file
     
 
     const user=await User.findById(creator).select("-password")
     // console.log(user.blogs.find(blogId=>blogId===id))
     // 
 
-    const blog=await Blog.findById(id)
+    const blog=await Blog.findOne({blogId:id})
     
     //blog.creator is a OBJECTID AND CREATOR IS STRING 
     if(!blog.creator.equals(creator)){
@@ -140,9 +164,19 @@ async function updateBlog(req,res){
 
     //  },{new:true})
 
+    if(image){
+      await deleteImagefromCloudinary(blog.imageId)
+      const{secure_url,public_id}=await uploadImage(image.path)
+      blog.image=secure_url
+      blog.imageId=public_id
+      fs.unlinkSync(image.path)
+    }
+
     blog.title=title ||  blog.title,
     blog.description=description || blog.description,
     blog.draft=draft || blog.draft
+    
+
 
     await blog.save()
      return res.status(200).json({

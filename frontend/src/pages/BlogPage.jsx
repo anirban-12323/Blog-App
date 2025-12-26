@@ -1,9 +1,10 @@
 import axios from "axios";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 function BlogPage() {
+  const user = JSON.parse(localStorage.getItem("user"));
   const { id } = useParams();
   const [blogData, setBlogData] = useState(null);
   async function fetchBlogById() {
@@ -30,6 +31,11 @@ function BlogPage() {
             alt=""
             className="w-full h-[400px] object-cover rounded-lg"
           />
+          {user.email === blogData.creator.email && (
+            <button className="bg-green-400 mt-5 px-6 py-2 text-2xl rounded">
+              <Link to={"/edit/" + blogData.blogId}> Edit</Link>
+            </button>
+          )}
         </div>
       ) : (
         <h1>loading....</h1>

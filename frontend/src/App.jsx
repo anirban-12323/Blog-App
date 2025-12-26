@@ -15,8 +15,9 @@ function App() {
           <Route path="/" element={<HomePage></HomePage>} />
           <Route path="/signin" element={<AuthForm type={"signin"} />} />
           <Route path="/signup" element={<AuthForm type={"signup"} />} />
-          <Route path="/add-blog" element={<AddBlog></AddBlog>} />
-          <Route path="/blog/:id" element={<BlogPage></BlogPage>} />
+          <Route path="/add-blog" element={<AddBlog />} />
+          <Route path="/blog/:id" element={<BlogPage />} />
+          <Route path="/edit/:id" element={<AddBlog />} />
         </Route>
 
         {/* Other routes */}
