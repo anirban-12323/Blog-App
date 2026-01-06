@@ -1,12 +1,17 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 const AddBlog = () => {
   const { id } = useParams();
+  const token = useSelector((slice) => slice.user.token);
+  const { title, description, image } = useSelector(
+    (slice) => slice.selectedBlog
+  );
 
-  const token = JSON.parse(localStorage.getItem("token"));
+  // const token = JSON.parse(localStorage.getItem("token"));
   const navigate = useNavigate();
   const [blogData, setBlogData] = useState({
     title: "",
@@ -61,19 +66,25 @@ const AddBlog = () => {
   }
 
   async function fetchBlogById() {
-    try {
-      let res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`
-      );
-      setBlogData({
-        title: res.data.blog.title,
-        description: res.data.blog.description,
-        image: res.data.blog.image,
-      });
-      console.log(res);
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
+    // try {
+    //   let res = await axios.get(
+    //     `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`
+    //   );
+    //   setBlogData({
+    //     title: res.data.blog.title,
+    //     description: res.data.blog.description,
+    //     image: res.data.blog.image,
+    //   });
+    //   console.log(res);
+    // } catch (error) {
+    //   toast.error(error.response.data.message);
+    // }
+
+    setBlogData({
+      title: title,
+      description: description,
+      image: image,
+    });
   }
   useEffect(() => {
     if (id) {

@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "../utils/userSlice";
 
 function AuthForm({ type }) {
   const [userData, setUserData] = useState({
@@ -9,33 +11,44 @@ function AuthForm({ type }) {
     email: "",
     password: "",
   });
+  const dispatch = useDispatch();
   async function handleRegister(e) {
     e.preventDefault();
 
+    const payload =
+      type === "signup"
+        ? userData
+        : {
+            email: userData.email,
+            password: userData.password,
+          };
+
     try {
-      // const data = await fetch(`http://localhost:3000/api/v1/${type}`, {
-      //   method: "POST",
-      //   body: JSON.stringify(userData),
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
-
-      //const res = await data.json();
-
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/${type}`,
-        userData
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-      console.log(res.status);
-      console.log(res);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      localStorage.setItem("token", JSON.stringify(res.data.token));
-      toast.success(res.data.message);
+
+      const { token, ...userWithoutToken } = res.data.user;
+
+      dispatch(
+        login({
+          user: userWithoutToken,
+          token,
+        })
+      );
+
+      toast.success(res.data.message || "Success");
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   }
+
   return (
     <div className="  w-[20%] flex flex-col items-center gap-5 mt-35">
       <h1 className="text-3xl">{type === "signin" ? "Sign in" : "Sign up"}</h1>
