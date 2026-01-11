@@ -49,8 +49,12 @@ async function createUser(req, res) {
     return res.status(200).json({
       success: true,
       message: "User created successfully",
-      user: { name: newUserObj.name, email: newUserObj.email },
-      token,
+      user: {
+        id: newUserObj._id,
+        name: newUserObj.name,
+        email: newUserObj.email,
+        token,
+      },
     });
   } catch (error) {
     return res.status(500).json({

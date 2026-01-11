@@ -26,8 +26,17 @@ function HomePage() {
               <h4 className="line-clamp-2">{blog.description}</h4>
               <div className="flex gap-3">
                 <p>{blog.createdAt}</p>
-                <p>500</p>
-                <p>200</p>
+                <div className="flex gap-4 ">
+                  <div className="cursor-pointer flex gap-2">
+                    <i className="fi fi-sr-thumbs-up text-blue-600 text-xl mt-1"></i>
+
+                    <p className="text-xl">{blog.likes.length}</p>
+                  </div>
+                  <div className=" flex gap-2">
+                    <i className="fi fi-sr-comment-alt text-xl mt-1"></i>
+                    {/* <p className="text-3xl">{blogData.likes.length}</p> */}
+                  </div>
+                </div>
               </div>
             </div>
             <div className="w-[30%]">
