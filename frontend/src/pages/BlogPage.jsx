@@ -73,11 +73,19 @@ function BlogPage() {
         <div>
           <h1 className="mt-10 front-bold text-4xl">{blogData.title}</h1>
           <h2 className="my-5 text-3xl">{blogData.creator.name}</h2>
-          <img
+          {/* <img
             src={blogData.image}
             alt=""
-            className="w-full h-[300px] object-cover rounded-lg"
-          />
+            className="w-full h-120 object-cover rounded-xl"
+          /> */}
+          <div className="w-full aspect-[16/9] overflow-hidden rounded-2xl bg-gray-200">
+            <img
+              src={blogData.image}
+              alt="blog"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
           {token && user.email === blogData.creator.email && (
             <Link to={"/edit/" + blogData.blogId}>
               <button className="bg-green-400 mt-5 px-6 py-2 text-2xl rounded">

@@ -13,7 +13,7 @@ function HomePage() {
     fetchBlogs();
   }, []);
   return (
-    <div className="w-[60%]">
+    <div className="w-[60%] mx-auto">
       {blogs.map((blog) => (
         <Link to={"blog/" + blog.blogId}>
           <div key={blog._id} className=" w-full my-5 flex justify-between">
@@ -39,8 +39,12 @@ function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="w-[30%]">
-              <img src={blog.image} alt="" />
+            <div className="w-[30%] object-cover rounded-xl">
+              <img
+                src={blog.image}
+                alt=""
+                className="w-full h-54 object-cover rounded-xl"
+              />
             </div>
           </div>
         </Link>
