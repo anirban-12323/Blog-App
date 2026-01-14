@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { formDate } from "../utils/formDate";
 
 function HomePage() {
   const [blogs, setBlogs] = useState([]);
@@ -25,7 +26,7 @@ function HomePage() {
               <h2 className="font-blod text-3xl">{blog.title}</h2>
               <h4 className="line-clamp-2">{blog.description}</h4>
               <div className="flex gap-3">
-                <p>{blog.createdAt}</p>
+                <p>{formDate(blog.createdAt)}</p>
                 <div className="flex gap-4 ">
                   <div className="cursor-pointer flex gap-2">
                     <i className="fi fi-sr-thumbs-up text-blue-600 text-xl mt-1"></i>

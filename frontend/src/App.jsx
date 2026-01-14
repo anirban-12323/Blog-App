@@ -5,6 +5,7 @@ import Navber from "./components/Navber";
 import HomePage from "./components/HomePage";
 import AddBlog from "./pages/AddBlog";
 import BlogPage from "./pages/BlogPage";
+import Comment from "./components/Comment";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
 
       {/* Other routes */}
     </Routes>
+
     //</div>
   );
 }

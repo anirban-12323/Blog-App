@@ -8,6 +8,8 @@ import {
   removeSelectedBlog,
 } from "../utils/selectedBlogSlice";
 import toast from "react-hot-toast";
+import Comment from "../components/Comment";
+import { toggleComment } from "../utils/commentSlice";
 
 function BlogPage() {
   const { id } = useParams();
@@ -19,6 +21,9 @@ function BlogPage() {
   const [blogData, setBlogData] = useState(null);
   const [isLike, setIsLike] = useState(false);
   const Location = useLocation();
+
+  const [commentCount, setCommentCount] = useState(0);
+
   async function fetchBlogById() {
     try {
       let res = await axios.get(
@@ -37,8 +42,20 @@ function BlogPage() {
       );
     }
   }
+
+  async function fetchCommentCount() {
+    try {
+      let res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}/comments/count`
+      );
+      setCommentCount(res.data.count);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     fetchBlogById();
+    fetchCommentCount();
     return () => {
       // console.log(window.location.pathname); // that give current location
       // console.log(Location.pathname); // that give previous location
@@ -68,49 +85,66 @@ function BlogPage() {
     }
   }
   return (
-    <div className="max-w-[1000px]">
+    <div className="max-w-[1000px] mx-auto ">
       {blogData ? (
         <div>
-          <h1 className="mt-10 front-bold text-4xl">{blogData.title}</h1>
-          <h2 className="my-5 text-3xl">{blogData.creator.name}</h2>
-          {/* <img
-            src={blogData.image}
-            alt=""
-            className="w-full h-120 object-cover rounded-xl"
-          /> */}
-          <div className="w-full aspect-[16/9] overflow-hidden rounded-2xl bg-gray-200">
+          {/* CONTENT WRAPPER (same width as image) */}
+          <div className="max-w-md mx-auto text-left">
+            {/* TITLE */}
+            <h1 className="mt-10 font-bold text-4xl capitalize">
+              {blogData.title}
+            </h1>
+
+            {/* AUTHOR */}
+            <p className="mt-2 text-xl text-gray-600">
+              {blogData.creator.name}
+            </p>
+
+            {/* IMAGE */}
             <img
               src={blogData.image}
               alt="blog"
-              className="w-full h-full object-cover"
+              className="mt-6 w-full h-92 object-cover rounded-xl"
             />
-          </div>
 
-          {token && user.email === blogData.creator.email && (
-            <Link to={"/edit/" + blogData.blogId}>
-              <button className="bg-green-400 mt-5 px-6 py-2 text-2xl rounded">
-                Edit
-              </button>
-            </Link>
-          )}
-          <div className="flex gap-4 mt-4">
-            <div className="cursor-pointer flex gap-2" onClick={handleOnClick}>
-              {isLike ? (
-                <i className="fi fi-sr-thumbs-up text-blue-600 text-2xl mt-1"></i>
-              ) : (
-                <i className="fi fi-rr-social-network text-2xl mt-1"></i>
+            {/* ACTION BAR */}
+            <div className="flex items-center justify-between mt-4">
+              {token && user.email === blogData.creator.email && (
+                <Link to={"/edit/" + blogData.blogId}>
+                  <button className="bg-green-400 px-4 py-1 text-lg rounded">
+                    Edit
+                  </button>
+                </Link>
               )}
-              <p className="text-3xl">{blogData.likes.length}</p>
-            </div>
-            <div className=" flex gap-2">
-              <i className="fi fi-sr-comment-alt text-2xl mt-1"></i>
-              {/* <p className="text-3xl">{blogData.likes.length}</p> */}
+
+              <div className="flex gap-6">
+                <div
+                  className="flex gap-2 items-center cursor-pointer"
+                  onClick={handleOnClick}
+                >
+                  {isLike ? (
+                    <i className="fi fi-sr-thumbs-up text-blue-600 text-xl"></i>
+                  ) : (
+                    <i className="fi fi-rr-social-network text-xl"></i>
+                  )}
+                  <span>{blogData.likes.length}</span>
+                </div>
+
+                <div className="flex gap-2 items-center cursor-pointer">
+                  <i
+                    onClick={() => dispatch(toggleComment())}
+                    className="fi fi-sr-comment-alt text-xl"
+                  ></i>
+                  <span>{commentCount}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       ) : (
         <h1>loading.....</h1>
       )}
+      <Comment />
     </div>
   );
 }

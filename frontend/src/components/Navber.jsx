@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router-dom";
-import logo from "../../public/logo.svg";
+import logo from "../assets/logo.svg";
+
 import { useSelector } from "react-redux";
 
 function Navber() {
