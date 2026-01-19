@@ -10,6 +10,7 @@ import {
 import toast from "react-hot-toast";
 import Comment from "../components/Comment";
 import { toggleComment } from "../utils/commentSlice";
+import { fetchComments } from "../utils/commentSlice";
 
 function BlogPage() {
   const { id } = useParams();
@@ -21,13 +22,14 @@ function BlogPage() {
   const [blogData, setBlogData] = useState(null);
   const [isLike, setIsLike] = useState(false);
   const Location = useLocation();
+  const commentCount = useSelector((state) => state.comments.count);
 
-  const [commentCount, setCommentCount] = useState(0);
+  // const [commentCount, setCommentCount] = useState(0);
 
   async function fetchBlogById() {
     try {
       let res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`,
       );
       setBlogData(res.data.blog);
       if (res.data.blog.likes.includes(userId)) {
@@ -38,24 +40,33 @@ function BlogPage() {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          "Something went wrong"
+          "Something went wrong",
       );
     }
   }
 
-  async function fetchCommentCount() {
-    try {
-      let res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}/comments/count`
-      );
-      setCommentCount(res.data.count);
-    } catch (error) {
-      console.log(error);
+  // async function fetchCommentCount(blogMongoId) {
+  //   try {
+  //     let res = await axios.get(
+  //       `${
+  //         import.meta.env.VITE_BACKEND_URL
+  //       }/blogs/${blogMongoId}/comments/count`,
+  //     );
+  //     setCommentCount(res.data.count);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  useEffect(() => {
+    if (!blogData?._id) {
+      return;
     }
-  }
+    // fetchCommentCount(blogData._id);
+  }, [blogData?._id]);
   useEffect(() => {
     fetchBlogById();
-    fetchCommentCount();
+
     return () => {
       // console.log(window.location.pathname); // that give current location
       // console.log(Location.pathname); // that give previous location
@@ -64,6 +75,12 @@ function BlogPage() {
       }
     };
   }, [id]);
+  useEffect(() => {
+    if (blogData?._id) {
+      dispatch(fetchComments(blogData._id));
+    }
+  }, [blogData?._id]);
+
   async function handleOnClick() {
     if (token) {
       setIsLike((prev) => !prev);
@@ -75,7 +92,7 @@ function BlogPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success(res.data.message);

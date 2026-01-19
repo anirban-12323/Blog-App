@@ -1,47 +1,73 @@
 const Comment = require("../models/commentSchema");
 async function addComment(req, res) {
   try {
-    const { blogId, comment } = req.body;
+    const { blogId } = req.params;
+    const { comment } = req.body; // ✅ matches schema
+
+    const userId = req.user.id; // ✅ from verifyUser middleware
 
     if (!comment) {
-      return res.status(400).json({
-        message: "vomment can not be empty",
-      });
+      return res.status(400).json({ message: "Comment is required" });
     }
 
     const newComment = await Comment.create({
       blogId,
-      user: req.user,
       comment,
+      user: userId,
     });
 
-    return res.status(200).json({
-      message: "comment added successfully",
+    res.status(201).json({
+      message: "Comment added successfully",
       comment: newComment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 }
 
-async function getComments(req, res) {
+async function getCommentsByBlog(req, res) {
   try {
-    const { id } = req.params;
-    const comments = await Comment.find({ blogId: id })
-      .populate("user", "name email")
-      .sort({ createdAt: -1 })
-      .lean();
+    const { blogId } = req.params;
+
+    const comments = await Comment.find({ blogId })
+      .populate("user", "name avatar")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ comments });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function likesComment(req, res) {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "comment is not found" });
+    }
+
+    const alreadyLiked = Comment.likes.includes(userId);
+
+    if (alreadyLiked) {
+      //unlike
+      comment.likes.pull(userId);
+    } else {
+      //like
+      comment.likes.push(userId);
+    }
+
+    await comment.save();
+
     return res.status(200).json({
-      message: "Comments fetched success",
-      comments,
+      message: alreadyLiked ? "comment unliked" : "comment liked",
+      likesCount: comment.likes.length,
     });
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      message: error.message,
+    res.status(500).json({
+      message: "Failed to like comment",
     });
   }
 }
@@ -69,7 +95,7 @@ async function editComment(req, res) {
       comment: exitingComment,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
 
     return res.status(500).json({
       message: error.message,
@@ -109,19 +135,22 @@ async function getCommentCount(req, res) {
   try {
     const { blogId } = req.params;
 
-    const count = Comment.countDocuments({ blogId });
+    const count = await Comment.countDocuments({ blogId });
 
     return res.status(200).json({ count });
   } catch (error) {
     return res.status(500).json({
       message: error.message,
     });
+    //console.log(error);
   }
 }
+
 module.exports = {
   addComment,
-  getComments,
+  getCommentsByBlog,
   editComment,
   deleteComment,
   getCommentCount,
+  likesComment,
 };
