@@ -45,31 +45,16 @@ function BlogPage() {
     }
   }
 
-  // async function fetchCommentCount(blogMongoId) {
-  //   try {
-  //     let res = await axios.get(
-  //       `${
-  //         import.meta.env.VITE_BACKEND_URL
-  //       }/blogs/${blogMongoId}/comments/count`,
-  //     );
-  //     setCommentCount(res.data.count);
-  //   } catch (error) {
-  //     console.log(error);
+  // useEffect(() => {
+  //   if (!blogData?._id) {
+  //     return;
   //   }
-  // }
-
-  useEffect(() => {
-    if (!blogData?._id) {
-      return;
-    }
-    // fetchCommentCount(blogData._id);
-  }, [blogData?._id]);
+  //   // fetchCommentCount(blogData._id);
+  // }, [blogData?._id]);
   useEffect(() => {
     fetchBlogById();
 
     return () => {
-      // console.log(window.location.pathname); // that give current location
-      // console.log(Location.pathname); // that give previous location
       if (window.location.pathname !== `/edit/${id}`) {
         dispatch(removeSelectedBlog());
       }

@@ -34,13 +34,13 @@ function Comment() {
     }
   }, [isOpen, blogId]);
 
-  useEffect(() => {
-    return () => {
-      if (blogId) {
-        dispatch(clearComments());
-      }
-    };
-  }, [blogId]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (blogId) {
+  //       dispatch(clearComments());
+  //     }
+  //   };
+  // }, [blogId]);
 
   if (!isOpen) return null;
   return (

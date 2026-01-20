@@ -15,7 +15,7 @@ export const fetchComments = createAsyncThunk(
 
 export const likeComment = createAsyncThunk(
   "comments/like",
-  async ({ commentId, token }) => {
+  async ({ commentId, token, userId }) => {
     const res = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/comments/${commentId}/like`,
       {},
@@ -25,7 +25,7 @@ export const likeComment = createAsyncThunk(
         },
       },
     );
-    return { commentId };
+    return { commentId, userId };
   },
 );
 
@@ -104,10 +104,19 @@ const commentSlice = createSlice({
       })
       //like comment
       .addCase(likeComment.fulfilled, (state, action) => {
-        const c = state.list.find((c) => c._id === action.payload.commentId);
+        const { commentId, userId } = action.payload;
 
-        if (c) {
-          c.likesCount += 1;
+        const c = state.list.find((c) => c._id === commentId);
+        if (!c) return;
+
+        const alreadyLiked = c.likes.includes(userId);
+
+        if (alreadyLiked) {
+          // unlike
+          c.likes = c.likes.filter((id) => id !== userId);
+        } else {
+          // like
+          c.likes.push(userId);
         }
       });
   },

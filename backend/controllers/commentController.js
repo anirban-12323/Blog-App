@@ -49,7 +49,7 @@ async function likesComment(req, res) {
       return res.status(404).json({ message: "comment is not found" });
     }
 
-    const alreadyLiked = Comment.likes.includes(userId);
+    const alreadyLiked = comment.likes.includes(userId);
 
     if (alreadyLiked) {
       //unlike
@@ -66,9 +66,11 @@ async function likesComment(req, res) {
       likesCount: comment.likes.length,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to like comment",
-    });
+    // res.status(500).json({
+    //   message: "Failed to like comment",
+    // });
+
+    console.log(error);
   }
 }
 
