@@ -29,6 +29,19 @@ export const likeComment = createAsyncThunk(
   },
 );
 
+//edit comment
+export const editComment = createAsyncThunk(
+  "comments/edit",
+  async ({ commentId, text, token }) => {
+    const res = await axios.put(
+      `${import.meta.env.VITE_BACKEND_URL}/comments/${commentId}`,
+      { comment: text },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return res.data.comment;
+  },
+);
+
 // add comment
 
 export const addComment = createAsyncThunk(
@@ -119,6 +132,15 @@ const commentSlice = createSlice({
           c.likes.push(userId);
         }
       });
+
+    // edit comment
+    builder.addCase(editComment.fulfilled, (state, action) => {
+      const index = state.list.findIndex((c) => c._id === action.payload._id);
+
+      if (index !== -1) {
+        state.list[index].comment = action.payload.comment;
+      }
+    });
   },
 });
 

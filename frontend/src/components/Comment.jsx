@@ -16,7 +16,7 @@ function Comment() {
   const [comment, setComment] = useState(""); //input value
 
   const { _id: blogId } = useSelector((state) => state.selectedBlog);
-  const { token } = useSelector((state) => state.user);
+  const { token, id: userId } = useSelector((state) => state.user);
   const { list: comments, loading } = useSelector((state) => state.comments);
 
   async function handleComment() {
@@ -93,6 +93,8 @@ function Comment() {
               <p className="text-sm font-semibold text-gray-800">
                 {c.user.name}
               </p>
+
+              <button className="bg-green-400  px-5 py-2">Edit</button>
             </div>
             <div className="flex gap-2">
               {" "}
