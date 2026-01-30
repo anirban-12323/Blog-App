@@ -60,6 +60,22 @@ export const addComment = createAsyncThunk(
   },
 );
 
+// delete comment
+export const deleteComment = createAsyncThunk(
+  "comments/delete",
+  async ({ commentId, token }) => {
+    await axios.delete(
+      `${import.meta.env.VITE_BACKEND_URL}/comments/${commentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return { commentId };
+  },
+);
+
 const initialState = {
   //UI
   isOpen: false,
@@ -140,6 +156,12 @@ const commentSlice = createSlice({
       if (index !== -1) {
         state.list[index].comment = action.payload.comment;
       }
+    });
+
+    //delete comment
+    builder.addCase(deleteComment.fulfilled, (state, action) => {
+      state.list = state.list.filter((c) => c._id !== action.payload.commentId);
+      state.count -= 1;
     });
   },
 });

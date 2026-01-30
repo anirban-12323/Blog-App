@@ -1,4 +1,5 @@
 const Comment = require("../models/commentSchema");
+const Blog = require("../models/blogSchema");
 async function addComment(req, res) {
   try {
     const { blogId } = req.params;
@@ -16,9 +17,20 @@ async function addComment(req, res) {
       user: userId,
     });
 
+    // 2️⃣ Increment commentsCount in Blog
+    await Blog.findByIdAndUpdate(blogId, {
+      $inc: { commentsCount: 1 },
+    });
+
+    // 3️⃣ Populate user before returning
+    const populatedComment = await Comment.findById(newComment._id).populate(
+      "user",
+      "name avatar",
+    );
+
     res.status(201).json({
       message: "Comment added successfully",
-      comment: newComment,
+      comment: populatedComment,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -79,26 +91,39 @@ async function editComment(req, res) {
     const { commentId } = req.params;
     const { comment } = req.body;
     const userId = req.user.id;
-    const exitingComment = await Comment.findById(commentId);
-    if (!exitingComment) {
+
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({
+        message: "Comment cannot be empty",
+      });
+    }
+
+    const existingComment = await Comment.findById(commentId);
+    if (!existingComment) {
       return res.status(404).json({
         message: "Comment not found",
       });
     }
-    if (exitingComment.user.id.toString() !== userId) {
+
+    if (existingComment.user.toString() !== userId) {
       return res.status(403).json({
-        message: "not authorized",
+        message: "Not authorized",
       });
     }
-    exitingComment.comment = comment;
-    await exitingComment.save();
+
+    existingComment.comment = comment;
+    await existingComment.save();
+
+    const populatedComment = await Comment.findById(commentId).populate(
+      "user",
+      "name avatar",
+    );
+
     res.status(200).json({
-      message: "comment updated successfully",
-      comment: exitingComment,
+      message: "Comment updated successfully",
+      comment: populatedComment,
     });
   } catch (error) {
-    // console.log(error);
-
     return res.status(500).json({
       message: error.message,
     });
@@ -115,7 +140,7 @@ async function deleteComment(req, res) {
         message: "Comment not found",
       });
     }
-    if (existingComment.user.id.toString() !== userId) {
+    if (existingComment.user.toString() !== userId) {
       return res.status(403).json({
         message: "not authorized",
       });
@@ -123,10 +148,13 @@ async function deleteComment(req, res) {
 
     await existingComment.deleteOne();
 
-    res.status(200).json({ message: "Comment deleted" });
-  } catch (error) {
-    console.log(error);
+    // 2️⃣ Decrement commentsCount in Blog
+    await Blog.findByIdAndUpdate(existingComment.blogId, {
+      $inc: { commentsCount: -1 },
+    });
 
+    res.status(200).json({ message: "Comment deleted", commentId });
+  } catch (error) {
     return res.status(500).json({
       message: error.message,
     });

@@ -22,7 +22,7 @@ function BlogPage() {
   const [blogData, setBlogData] = useState(null);
   const [isLike, setIsLike] = useState(false);
   const Location = useLocation();
-  const commentCount = useSelector((state) => state.comments.count);
+  //const commentCount = useSelector((state) => state.comments.count);
 
   // const [commentCount, setCommentCount] = useState(0);
 
@@ -60,11 +60,11 @@ function BlogPage() {
       }
     };
   }, [id]);
-  useEffect(() => {
-    if (blogData?._id) {
-      dispatch(fetchComments(blogData._id));
-    }
-  }, [blogData?._id]);
+  // //useEffect(() => {
+  //   if (blogData?._id) {
+  //     dispatch(fetchComments(blogData._id));
+  //   }
+  // }, [blogData?._id]);
 
   async function handleOnClick() {
     if (token) {
@@ -137,7 +137,7 @@ function BlogPage() {
                     onClick={() => dispatch(toggleComment())}
                     className="fi fi-sr-comment-alt text-xl"
                   ></i>
-                  <span>{commentCount}</span>
+                  <span>{blogData.commentsCount}</span>
                 </div>
               </div>
             </div>
@@ -146,7 +146,7 @@ function BlogPage() {
       ) : (
         <h1>loading.....</h1>
       )}
-      <Comment />
+      <Comment onCommentChange={fetchBlogById} />
     </div>
   );
 }

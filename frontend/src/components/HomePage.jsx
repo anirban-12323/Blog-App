@@ -5,6 +5,7 @@ import { formDate } from "../utils/formDate";
 
 function HomePage() {
   const [blogs, setBlogs] = useState([]);
+
   async function fetchBlogs() {
     let res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/blogs`);
     console.log(res.data.blogs);
@@ -16,8 +17,8 @@ function HomePage() {
   return (
     <div className="w-[60%] mx-auto">
       {blogs.map((blog) => (
-        <Link to={"blog/" + blog.blogId}>
-          <div key={blog._id} className=" w-full my-5 flex justify-between">
+        <Link key={blog._id} to={"blog/" + blog.blogId}>
+          <div className=" w-full my-5 flex justify-between">
             <div className="w-[60%] flex flex-col gap-3">
               <div>
                 {/* <img src="" alt="" /> */}
@@ -35,7 +36,7 @@ function HomePage() {
                   </div>
                   <div className=" flex gap-2">
                     <i className="fi fi-sr-comment-alt text-xl mt-1"></i>
-                    {/* <p className="text-3xl">{blogData.likes.length}</p> */}
+                    <p className="text-xl">{blog.commentsCount}</p>
                   </div>
                 </div>
               </div>

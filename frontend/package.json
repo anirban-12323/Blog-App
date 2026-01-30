@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@editorjs/editorjs": "^2.31.1",
+    "@editorjs/header": "^2.8.8",
     "@flaticon/flaticon-uicons": "^3.3.1",
     "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.1.17",

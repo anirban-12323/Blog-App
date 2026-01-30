@@ -20,9 +20,9 @@ async function createBlog(req, res) {
     }
 
     const creator = isValid.id;
-    const { title, description, draft } = req.body;
+    const { title, description, draft, content } = req.body;
     const image = req.file;
-    console.log({ title, description, draft, image });
+
     if (!title && !description) {
       return res.status(400).json({
         message: "please fill all the field",
@@ -34,6 +34,10 @@ async function createBlog(req, res) {
     } else if (!description) {
       return res.status(400).json({
         message: "please fill description field",
+      });
+    } else if (!content) {
+      return res.status(400).json({
+        message: "please add some content",
       });
     }
 
@@ -57,6 +61,7 @@ async function createBlog(req, res) {
       image: secure_url,
       imageId: public_id,
       blogId,
+      content,
     });
     console.log("Blog created:", blog);
     await User.findByIdAndUpdate(creator, { $push: { blogs: blog._id } });
