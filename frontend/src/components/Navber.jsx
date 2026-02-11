@@ -1,11 +1,16 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 
 import { useSelector } from "react-redux";
 
 function Navber() {
   const { token } = useSelector((state) => state.user);
-  const { name } = useSelector((state) => state.user.user);
+  const { name } = useSelector((state) => state.user.user || {});
+  const navigate = useNavigate();
+
+  const handleWriteClick = () => {
+    navigate("/add-blog");
+  };
   return (
     // <div className="flex-none w-full h-full flex flex-col items-center overflow-x-hidden">
     //   <div className="w-full bg-gray-700 h-[60px] flex items-center px-6 shadow-md">
@@ -37,11 +42,13 @@ function Navber() {
         <div className="flex gap-4 justify-center items-center">
           <div className="flex gap-1 justify-center items-center ">
             <i className="fi fi-rr-file-edit text-2xl mt-2"></i>
-            <span className="text-xl">Write</span>
+            <span onClick={handleWriteClick} className="text-xl cursor-pointer">
+              Write
+            </span>
           </div>
 
           {token ? (
-            <div className="text-xl capitalize">{name}</div>
+            <div className="text-xl capitalize">{name || "User"}</div>
           ) : (
             <div className="flex gap-1">
               <Link to={"/signup"}>

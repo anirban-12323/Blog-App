@@ -1,41 +1,44 @@
 import axios from "axios";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+
 import {
   addSelectedBlog,
   removeSelectedBlog,
 } from "../utils/selectedBlogSlice";
-import toast from "react-hot-toast";
-import Comment from "../components/Comment";
 import { toggleComment } from "../utils/commentSlice";
-import { fetchComments } from "../utils/commentSlice";
+import Comment from "../components/Comment";
+
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 function BlogPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  // const user = JSON.parse(localStorage.getItem("user"));
 
-  const { token, user, id: userId } = useSelector((slice) => slice.user);
+  const { token, user, id: userId } = useSelector((s) => s.user);
 
   const [blogData, setBlogData] = useState(null);
   const [isLike, setIsLike] = useState(false);
-  const Location = useLocation();
-  //const commentCount = useSelector((state) => state.comments.count);
 
-  // const [commentCount, setCommentCount] = useState(0);
-
+  // =========================
+  // Fetch blog
+  // =========================
   async function fetchBlogById() {
     try {
-      let res = await axios.get(
+      const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/blogs/${id}`,
       );
-      setBlogData(res.data.blog);
-      if (res.data.blog.likes.includes(userId)) {
-        setIsLike((prev) => !prev);
+
+      const blog = res.data.blog;
+      setBlogData(blog);
+      dispatch(addSelectedBlog(blog));
+
+      if (blog.likes.includes(userId)) {
+        setIsLike(true);
       }
-      dispatch(addSelectedBlog(res.data.blog));
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
@@ -45,107 +48,141 @@ function BlogPage() {
     }
   }
 
-  // useEffect(() => {
-  //   if (!blogData?._id) {
-  //     return;
-  //   }
-  //   // fetchCommentCount(blogData._id);
-  // }, [blogData?._id]);
+  // =========================
+  // TipTap viewer (READ ONLY)
+  // =========================
+  const viewer = useEditor({
+    extensions: [StarterKit],
+
+    editable: false,
+  });
+
+  // =========================
+  //Inject content after blogData loads
+  // =========================
+
+  useEffect(() => {
+    if (viewer && blogData?.content) {
+      viewer.commands.setContent(blogData.content);
+    }
+  }, [viewer, blogData]);
+
+  // =========================
+  // Like handler
+  // =========================
+  async function handleLike() {
+    if (!token) {
+      toast.error("Please signin to like this blog");
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/blogs/like/${blogData._id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      setIsLike((p) => !p);
+      fetchBlogById();
+    } catch (error) {
+      toast.error("Failed to like blog");
+    }
+  }
+
   useEffect(() => {
     fetchBlogById();
 
     return () => {
-      if (window.location.pathname !== `/edit/${id}`) {
-        dispatch(removeSelectedBlog());
-      }
+      dispatch(removeSelectedBlog());
     };
   }, [id]);
-  // //useEffect(() => {
-  //   if (blogData?._id) {
-  //     dispatch(fetchComments(blogData._id));
-  //   }
-  // }, [blogData?._id]);
 
-  async function handleOnClick() {
-    if (token) {
-      setIsLike((prev) => !prev);
-      //
-      let res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/blogs/like/${blogData._id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+  if (!blogData) return <h1 className="text-center">Loading…</h1>;
 
-      toast.success(res.data.message);
-      await fetchBlogById();
-    } else {
-      return toast.error("Please signin for like this blog");
-    }
-  }
   return (
-    <div className="max-w-[1000px] mx-auto ">
-      {blogData ? (
-        <div>
-          {/* CONTENT WRAPPER (same width as image) */}
-          <div className="max-w-md mx-auto text-left">
-            {/* TITLE */}
-            <h1 className="mt-10 font-bold text-4xl capitalize">
-              {blogData.title}
-            </h1>
+    <div className="max-w-[1100px] mx-auto px-4">
+      {/* =========================
+          HEADER
+      ========================= */}
+      <div className="max-w-2xl mx-auto">
+        <h1 className="mt-10 font-bold text-4xl leading-tight">
+          {blogData.title}
+        </h1>
 
-            {/* AUTHOR */}
-            <p className="mt-2 text-xl text-gray-600">
-              {blogData.creator.name}
-            </p>
+        <p className="mt-3 text-lg text-gray-600">{blogData.creator.name}</p>
 
-            {/* IMAGE */}
-            <img
-              src={blogData.image}
-              alt="blog"
-              className="mt-6 w-full h-92 object-cover rounded-xl"
-            />
+        {/* =========================
+            COVER IMAGE (CONTROLLED)
+        ========================= */}
+        <div className="mt-5">
+          <img
+            src={blogData.image}
+            alt="blog cover"
+            className="
+              w-full
+              max-h-[350px]
+              object-cover
+              rounded-2xl
+              shadow-sm
+            "
+          />
+        </div>
 
-            {/* ACTION BAR */}
-            <div className="flex items-center justify-between mt-4">
-              {token && user.email === blogData.creator.email && (
-                <Link to={"/edit/" + blogData.blogId}>
-                  <button className="bg-green-400 px-4 py-1 text-lg rounded">
-                    Edit
-                  </button>
-                </Link>
-              )}
+        {/* =========================
+            ACTION BAR
+        ========================= */}
+        <div className="flex items-center justify-between mt-5">
+          {token && user.email === blogData.creator.email && (
+            <Link to={`/edit/${blogData.blogId}`}>
+              <button className="bg-green-500 px-4 py-1 text-white rounded">
+                Edit
+              </button>
+            </Link>
+          )}
 
-              <div className="flex gap-6">
-                <div
-                  className="flex gap-2 items-center cursor-pointer"
-                  onClick={handleOnClick}
-                >
-                  {isLike ? (
-                    <i className="fi fi-sr-thumbs-up text-blue-600 text-xl"></i>
-                  ) : (
-                    <i className="fi fi-rr-social-network text-xl"></i>
-                  )}
-                  <span>{blogData.likes.length}</span>
-                </div>
+          <div className="flex gap-6">
+            <div
+              onClick={handleLike}
+              className="flex gap-2 items-center cursor-pointer"
+            >
+              <i
+                className={`fi ${
+                  isLike
+                    ? "fi-sr-thumbs-up text-blue-600"
+                    : "fi-rr-social-network"
+                } text-xl`}
+              />
+              <span>{blogData.likes.length}</span>
+            </div>
 
-                <div className="flex gap-2 items-center cursor-pointer">
-                  <i
-                    onClick={() => dispatch(toggleComment())}
-                    className="fi fi-sr-comment-alt text-xl"
-                  ></i>
-                  <span>{blogData.commentsCount}</span>
-                </div>
-              </div>
+            <div
+              className="flex gap-2 items-center cursor-pointer"
+              onClick={() => dispatch(toggleComment())}
+            >
+              <i className="fi fi-sr-comment-alt text-xl" />
+              <span>{blogData.commentsCount}</span>
             </div>
           </div>
         </div>
-      ) : (
-        <h1>loading.....</h1>
-      )}
+
+        {/* =========================
+            BLOG CONTENT (TipTap)
+        ========================= */}
+        {viewer && (
+          <div className="mt-10">
+            <div className="prose prose-lg max-w-none">
+              <EditorContent editor={viewer} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* =========================
+          COMMENTS
+      ========================= */}
       <Comment onCommentChange={fetchBlogById} />
     </div>
   );

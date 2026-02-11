@@ -10,73 +10,98 @@ const uniqid = require("uniqid");
 
 async function createBlog(req, res) {
   try {
-    let token = req.headers.authorization?.split(" ")[1];
-    let isValid = await verifyJWT(token);
+    // 🔐 AUTHTICATION
+    const token = req.headers.authorization?.split(" ")[1];
+    const isValid = await verifyJWT(token);
 
     if (!isValid) {
-      return res.status(400).json({
-        message: "Invalid token",
-      });
+      return res.status(401).json({ message: "Invalid token" });
     }
 
     const creator = isValid.id;
-    const { title, description, draft, content } = req.body;
-    const image = req.file;
 
-    if (!title && !description) {
+    // 📦 BODY
+    const { title, description, draft } = req.body;
+
+    if (!title || !description || !req.body.content) {
       return res.status(400).json({
-        message: "please fill all the field",
-      });
-    } else if (!title) {
-      return res.status(400).json({
-        message: "please fill title field",
-      });
-    } else if (!description) {
-      return res.status(400).json({
-        message: "please fill description field",
-      });
-    } else if (!content) {
-      return res.status(400).json({
-        message: "please add some content",
+        message: "Title, description and content are required",
       });
     }
 
-    const findUser = await User.findById(creator);
+    // 🧾 PARSE TIPTAP CONTENT  (TEXT ONLY)
 
-    if (!findUser) {
+    let content;
+    try {
+      content = JSON.parse(req.body.content);
+    } catch (error) {
+      return res.status(400).json({
+        message: "Invalid content format",
+      });
+    }
+
+    // 🖼️ COVER IMAGE (SINGLE FILE)
+    const coverImage = req.file;
+
+    // ❗ COVER IMAGE IS REQUIRED
+    if (!coverImage || !coverImage.path) {
+      return res.status(400).json({
+        message: "Cover image is required",
+      });
+    }
+
+    // UPLOAD COVER IMAGE
+    const uploadResult = await uploadImage(coverImage.path);
+    if (!uploadResult) {
+      fs.unlinkSync(coverImage.path);
       return res.status(500).json({
-        message: "kon hei vai tu mei tuje nahi janta",
+        message: "Cover image upload failed",
       });
     }
 
-    const { secure_url, public_id } = await uploadImage(image.path);
-    fs.unlinkSync(image.path);
-    const blogId = title.toLowerCase().split(" ").join("-") + "-" + uniqid();
+    const coverImageUrl = uploadResult.secure_url;
+    const coverImageId = uploadResult.public_id;
+
+    //remove temp file
+
+    fs.unlinkSync(coverImage.path);
+
+    // BLOG ID
+    const blogId =
+      title.toLowerCase().trim().split(" ").join("-") + "-" + uniqid();
+
+    // ============================
+    // 📝 SAVE BLOG
+    // ============================
 
     const blog = await Blog.create({
       title,
       description,
       draft,
       creator,
-      image: secure_url,
-      imageId: public_id,
       blogId,
-      content,
+      image: coverImageUrl,
+      imageId: coverImageId,
+      content, //TIPTAP JSON (text only)
     });
-    console.log("Blog created:", blog);
-    await User.findByIdAndUpdate(creator, { $push: { blogs: blog._id } });
-    console.log("User updated!");
 
-    return res.status(200).json({
+    await User.findByIdAndUpdate(creator, {
+      $push: { blogs: blog._id },
+    });
+
+    return res.status(201).json({
       message: "Blog created successfully",
       blog,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: error.message,
     });
   }
 }
+
+module.exports = createBlog;
 
 async function getBlogs(req, res) {
   try {
@@ -130,53 +155,98 @@ async function getBlog(req, res) {
 
 async function updateBlog(req, res) {
   try {
-    const creator = req.user;
+    console.log("update blog running..");
+    const blogId = req.params.id;
+    // 🔐 AUTHTICATION
+    const token = req.headers.authorization?.split(" ")[1];
+    const isValid = await verifyJWT(token);
 
-    const { id } = req.params;
-    const { title, description, draft } = req.body;
-    const image = req.file;
-
-    const user = await User.findById(creator).select("-password");
-    // console.log(user.blogs.find(blogId=>blogId===id))
-    //
-
-    const blog = await Blog.findOne({ blogId: id });
-
-    //blog.creator is a OBJECTID AND CREATOR IS STRING
-    if (!blog.creator.equals(creator)) {
-      return res.status(500).json({
-        message: "You are not authorized for this action",
+    if (!isValid) {
+      res.status(401).json({
+        message: "Invalid token",
       });
     }
 
-    //  const updatedBlog=await Blog.updateOne({_id:id},{
-    //   title,
-    //   description,
-    //   draft
+    //find the blog using blogId
+    console.log("Searching for blog..");
+    const blog = await Blog.findOne({ blogId });
+    console.log(blog);
 
-    //  },{new:true})
-
-    if (image) {
-      await deleteImagefromCloudinary(blog.imageId);
-      const { secure_url, public_id } = await uploadImage(image.path);
-      blog.image = secure_url;
-      blog.imageId = public_id;
-      fs.unlinkSync(image.path);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
     }
 
-    ((blog.title = title || blog.title),
-      (blog.description = description || blog.description),
-      (blog.draft = draft || blog.draft));
+    // only creator of the blog, can be update the blog
+    if (blog.creator.toString() !== isValid.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const { title, description } = req.body;
+    if (!title || !description || !req.body.content) {
+      return res.status(400).json({
+        message: "title,description and content required",
+      });
+    }
+    let content; //TIPTAP text
+
+    try {
+      content = JSON.parse(req.body.content);
+    } catch (error) {
+      return res.status(400).json({
+        message: "Invalid content format",
+      });
+    }
+
+    //HANDLE COVER IMAGE
+    const newImage = req.file;
+    let imageUrl = blog.image;
+    let imageId = blog.imageId;
+
+    if (newImage && newImage.path) {
+      //delete old image from cloudinary
+
+      if (blog.imageId) {
+        await deleteImagefromCloudinary(blog.imageId);
+      }
+
+      const uploadResult = await uploadImage(newImage.path);
+
+      if (!uploadImage) {
+        fs.unlinkSync(newImage.path);
+        return res.status(500).json({
+          message: "Image upload failed",
+        });
+      }
+
+      imageUrl = uploadResult.secure_url;
+      imageId = uploadResult.public_id;
+
+      // remove temp file
+
+      fs.unlinkSync(newImage.path);
+    }
+
+    // =========================
+    // 📝 Update Blog
+    // =========================
+
+    blog.title = title;
+    blog.description = description;
+    blog.content = content;
+    blog.image = imageUrl;
+    blog.imageId = imageId;
 
     await blog.save();
+
     return res.status(200).json({
-      success: true,
       message: "Blog updated successfully",
       blog,
     });
-    // // const blog= await Blog.findByIdAndUpdate(blogId,{title,description,draft})
   } catch (error) {
-    message: error.message;
+    console.error(error);
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 }
 
