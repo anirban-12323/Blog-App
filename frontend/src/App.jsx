@@ -11,11 +11,12 @@ function App() {
   return (
     // <div className="bg-slate-200 w-screen h-screen ">
     <Routes>
+      {/* Auth routes (no navbar) */}
+      <Route path="/signin" element={<AuthForm type={"signin"} />} />
+      <Route path="/signup" element={<AuthForm type={"signup"} />} />
       {/* Default route (optional) */}
       <Route path="/" element={<Navber />}>
         <Route path="/" element={<HomePage></HomePage>} />
-        <Route path="/signin" element={<AuthForm type={"signin"} />} />
-        <Route path="/signup" element={<AuthForm type={"signup"} />} />
         <Route path="/add-blog" element={<AddBlog />} />
         <Route path="/blog/:id" element={<BlogPage />} />
         <Route path="/edit/:id" element={<AddBlog />} />
