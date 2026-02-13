@@ -25,6 +25,19 @@ const commentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  //FOR NESTED COMMENT
+  replies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
+  parentComment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Comment",
+    default: null,
+  },
 });
 
 const Comment = mongoose.model("Comment", commentSchema);

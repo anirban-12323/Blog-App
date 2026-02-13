@@ -182,14 +182,26 @@ function Comment({ onCommentChange }) {
 
               {/* ACTIONS */}
               <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                <button
-                  onClick={() =>
-                    dispatch(likeComment({ commentId: c._id, token }))
-                  }
-                  className="hover:text-black"
-                >
-                  ❤️ {c.likes.length}
-                </button>
+                <div className="flex justify-between gap-16 ">
+                  <div className="flex justify-between gap-6">
+                    <div>
+                      <button
+                        onClick={() =>
+                          dispatch(likeComment({ commentId: c._id, token }))
+                        }
+                        className="hover:text-black"
+                      >
+                        ❤️ {c.likes.length}
+                      </button>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      {" "}
+                      <i class="fi fi-sr-comment-alt"></i>
+                      <p className=" text-s">6</p>
+                    </div>
+                  </div>
+                  <div>reply</div>
+                </div>
 
                 {c.user._id === userId && editingId !== c._id && (
                   <button

@@ -7,6 +7,7 @@ const {
   deleteComment,
   getCommentCount,
   likesComment,
+  addNestedComment,
 } = require("../controllers/commentController");
 
 const verifyUser = require("../middlewares/auth");
@@ -20,5 +21,7 @@ route.post("/comments/:commentId/like", verifyUser, likesComment);
 route.put("/comments/:commentId", verifyUser, editComment);
 route.delete("/comments/:commentId", verifyUser, deleteComment);
 route.get("/blogs/:blogId/comments/count", getCommentCount);
+
+route.post("/comment/:parentCommentId/:blogId", verifyUser, addNestedComment);
 
 module.exports = route;

@@ -176,6 +176,50 @@ async function getCommentCount(req, res) {
   }
 }
 
+//ADD NESTED COMMENT
+async function addNestedComment(req, res) {
+  try {
+    const userId = req.user.id;
+    const { blogId, parentCommentId } = req.params;
+    const { reply } = req.body;
+    //get comment from parentCommentId
+    const comment = await Comment.findById(parentCommentId);
+
+    if (!comment) {
+      return res.status(404).json({ message: "comment is not found" });
+    }
+
+    // get blog from blogId
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: "blog is not found" });
+    }
+
+    const newReply = await Comment.create({
+      blogId: blogId,
+      user: userId,
+      comment: reply,
+      parentComment: parentCommentId,
+    });
+
+    await Comment.findByIdAndUpdate(parentCommentId, {
+      $push: {
+        replies: newReply._id,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "reply added successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to add reply",
+    });
+  }
+}
+
 module.exports = {
   addComment,
   getCommentsByBlog,
@@ -183,4 +227,5 @@ module.exports = {
   deleteComment,
   getCommentCount,
   likesComment,
+  addNestedComment,
 };
