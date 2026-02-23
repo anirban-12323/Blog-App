@@ -1,4 +1,6 @@
+const path = require("path");
 const Blog = require("../models/blogSchema");
+const Comment = require("../models/commentSchema");
 const User = require("../models/userSchema");
 const { verifyJWT } = require("../utils/generateToken");
 const {
@@ -101,8 +103,6 @@ async function createBlog(req, res) {
   }
 }
 
-module.exports = createBlog;
-
 async function getBlogs(req, res) {
   try {
     // const blogs=await Blog.find({draft:false}).populate("creator")
@@ -124,32 +124,39 @@ async function getBlogs(req, res) {
 async function getBlog(req, res) {
   try {
     const { blogId } = req.params;
-    const blog = await Blog.findOne({ blogId })
-      // .populate({
-      //   path:"comments",
-      //   populate:{
-      //     path:"user",
-      //     select:"name email"
-      //   }
-
-      // })
-      .populate({
-        path: "creator",
-        select: "name email",
-      });
+    const blog = await Blog.findOne({ blogId }).populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "name email ",
+      },
+    });
     if (!blog) {
       return res.status(404).json({
         message: "Blog not found",
       });
     }
+    const replyCheck = await Comment.findById("69943388ed05aa5fa2ce3e38");
+    //FOR REPLIES
+    const comments = await Comment.find({
+      blogId: blog._id,
+      parentComment: null,
+    })
+      .populate("user", "name email")
+      .populate({
+        path: "replies",
+        populate: {
+          path: "user",
+          select: "name email",
+        },
+      });
     return res.status(200).json({
       message: "Blog fetch successfully",
       blog,
+      comments,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
+    console.log(error);
   }
 }
 

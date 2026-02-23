@@ -45,17 +45,18 @@ export const editComment = createAsyncThunk(
 // add comment
 
 export const addComment = createAsyncThunk(
-  "comments/add",
+  "comment/add",
   async ({ blogId, comment, token }) => {
     const res = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/blogs/${blogId}/comments`,
-      { comment: comment },
+      `${import.meta.env.VITE_BACKEND_URL}/blogs/${blogId}/comment`,
+      { comment },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
+
     return res.data.comment;
   },
 );
@@ -88,9 +89,13 @@ const initialState = {
 };
 
 const commentSlice = createSlice({
-  name: "comments",
+  name: "commentSlice",
   initialState,
   reducers: {
+    setIsOpen: (state, action) => {
+      state.isOpen = action.payload === false ? false : !state.isOpen;
+    },
+
     //toggleComment panel
 
     toggleComment: (state) => {
@@ -166,6 +171,12 @@ const commentSlice = createSlice({
   },
 });
 
-export const { toggleComment, closeComment, openComment, clearComments } =
-  commentSlice.actions;
+export const {
+  setIsOpen,
+  toggleComment,
+  closeComment,
+  openComment,
+  clearComments,
+  setComments, //new addition
+} = commentSlice.actions;
 export default commentSlice.reducer;

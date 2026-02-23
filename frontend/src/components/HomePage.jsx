@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { formDate } from "../utils/formDate";
+import { formatDate } from "../utils/formDate";
+import { useSelector } from "react-redux";
 
 function HomePage() {
   const [blogs, setBlogs] = useState([]);
+  const { comments } = useSelector((state) => state.selectedBlog);
 
   async function fetchBlogs() {
     let res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/blogs`);
@@ -27,7 +29,7 @@ function HomePage() {
               <h2 className="font-blod text-3xl">{blog.title}</h2>
               <h4 className="line-clamp-2">{blog.description}</h4>
               <div className="flex gap-3">
-                <p>{formDate(blog.createdAt)}</p>
+                <p>{formatDate(blog.createdAt)}</p>
                 <div className="flex gap-4 ">
                   <div className="cursor-pointer flex gap-2">
                     <i className="fi fi-sr-thumbs-up text-blue-600 text-xl mt-1"></i>
@@ -36,7 +38,7 @@ function HomePage() {
                   </div>
                   <div className=" flex gap-2">
                     <i className="fi fi-sr-comment-alt text-xl mt-1"></i>
-                    <p className="text-xl">{blog.commentsCount}</p>
+                    <p className="text-xl">{comments?.length}</p>
                   </div>
                 </div>
               </div>

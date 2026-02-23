@@ -8,7 +8,7 @@ import {
   addSelectedBlog,
   removeSelectedBlog,
 } from "../utils/selectedBlogSlice";
-import { toggleComment } from "../utils/commentSlice";
+import { toggleComment, setIsOpen } from "../utils/commentSlice";
 import Comment from "../components/Comment";
 
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -19,9 +19,11 @@ function BlogPage() {
   const dispatch = useDispatch();
 
   const { token, user, id: userId } = useSelector((s) => s.user);
+  const { comments } = useSelector((state) => state.selectedBlog);
 
   const [blogData, setBlogData] = useState(null);
   const [isLike, setIsLike] = useState(false);
+  const { isOpen } = useSelector((state) => state.comments);
 
   // =========================
   // Fetch blog
@@ -96,6 +98,7 @@ function BlogPage() {
     fetchBlogById();
 
     return () => {
+      dispatch(setIsOpen(false));
       dispatch(removeSelectedBlog());
     };
   }, [id]);
@@ -160,10 +163,14 @@ function BlogPage() {
 
             <div
               className="flex gap-2 items-center cursor-pointer"
-              onClick={() => dispatch(toggleComment())}
+              // changeeee**************
+              // onClick={() => dispatch(toggleComment())}
             >
-              <i className="fi fi-sr-comment-alt text-xl" />
-              <span>{blogData.commentsCount}</span>
+              <i
+                className="fi fi-sr-comment-alt text-xl"
+                onClick={() => dispatch(setIsOpen())}
+              />
+              <span>{comments.length || 0}</span>
             </div>
           </div>
         </div>
@@ -183,7 +190,7 @@ function BlogPage() {
       {/* =========================
           COMMENTS
       ========================= */}
-      <Comment onCommentChange={fetchBlogById} />
+      {isOpen && <Comment />}
     </div>
   );
 }

@@ -14,7 +14,7 @@ const verifyUser = require("../middlewares/auth");
 
 const route = express.Router();
 
-route.post("/blogs/:blogId/comments", verifyUser, addComment);
+route.post("/blogs/:blogId/comment", verifyUser, addComment);
 route.get("/blogs/:blogId/comments", getCommentsByBlog);
 route.post("/comments/:commentId/like", verifyUser, likesComment);
 

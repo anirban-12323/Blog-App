@@ -1,4 +1,4 @@
-export function formDate(date) {
+export function formatDate(date) {
   let formDate = new Date(date).toLocaleDateString();
-  return formDate;
+  return formatDate;
 }

@@ -45,6 +45,13 @@ const blogSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     dislikes: [
       {
         type: mongoose.Schema.Types.ObjectId,

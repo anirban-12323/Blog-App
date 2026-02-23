@@ -3,34 +3,40 @@ const Blog = require("../models/blogSchema");
 async function addComment(req, res) {
   try {
     const { blogId } = req.params;
-    const { comment } = req.body; // ✅ matches schema
+    console.log("blogId from params:", blogId);
 
-    const userId = req.user.id; // ✅ from verifyUser middleware
+    const { comment } = req.body;
+    const creator = req.user.id;
 
     if (!comment) {
-      return res.status(400).json({ message: "Comment is required" });
+      return res.status(400).json({ message: "Please enter the comment" });
+    }
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
     }
 
     const newComment = await Comment.create({
-      blogId,
+      blogId: blogId, // FIXED
+      user: creator,
       comment,
-      user: userId,
+    }).then((comment) => {
+      return comment.populate({
+        path: "user",
+        select: "name email",
+      });
     });
 
-    // 2️⃣ Increment commentsCount in Blog
     await Blog.findByIdAndUpdate(blogId, {
+      $push: { comments: newComment._id },
       $inc: { commentsCount: 1 },
     });
 
-    // 3️⃣ Populate user before returning
-    const populatedComment = await Comment.findById(newComment._id).populate(
-      "user",
-      "name avatar",
-    );
-
     res.status(201).json({
+      success: true,
       message: "Comment added successfully",
-      comment: populatedComment,
+      newComment,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -39,13 +45,32 @@ async function addComment(req, res) {
 
 async function getCommentsByBlog(req, res) {
   try {
+    console.log("getCommentsByBlog running");
     const { blogId } = req.params;
 
-    const comments = await Comment.find({ blogId })
-      .populate("user", "name avatar")
-      .sort({ createdAt: -1 });
+    //FIND BLOG USING SLUG
 
-    res.status(200).json({ comments });
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog bot found" });
+    }
+
+    //get cmments
+    const comments = await Comment.find({
+      blogId: blog._id,
+      parentComment: null,
+    })
+      .populate("user", "name email")
+      .populate({
+        path: "replies",
+        populate: {
+          path: "user",
+          select: "name email",
+        },
+      });
+
+    return res.status(200).json({ comments });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
