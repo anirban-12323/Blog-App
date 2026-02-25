@@ -226,6 +226,11 @@ async function addNestedComment(req, res) {
       user: userId,
       comment: reply,
       parentComment: parentCommentId,
+    }).then((reply) => {
+      return reply.populate({
+        path: "user",
+        select: "name email",
+      });
     });
 
     await Comment.findByIdAndUpdate(parentCommentId, {
@@ -237,10 +242,11 @@ async function addNestedComment(req, res) {
     return res.status(200).json({
       success: true,
       message: "reply added successfully",
+      newReply,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to add reply",
+      message: error.message,
     });
   }
 }

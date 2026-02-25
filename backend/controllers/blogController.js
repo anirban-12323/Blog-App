@@ -124,32 +124,53 @@ async function getBlogs(req, res) {
 async function getBlog(req, res) {
   try {
     const { blogId } = req.params;
-    const blog = await Blog.findOne({ blogId }).populate({
-      path: "comments",
-      populate: {
-        path: "user",
-        select: "name email ",
-      },
-    });
+    const blog = await Blog.findOne({ blogId })
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user",
+          select: "name email",
+        },
+      })
+      .populate({
+        path: "creator",
+        select: "name email",
+      })
+      .lean();
+
+    async function populateReplies(comments) {
+      for (const comment of comments) {
+        let populatedComment = await Comment.findById(comment._id)
+          .populate({
+            path: "replies",
+            populate: {
+              path: "user",
+              select: "name email",
+            },
+          })
+          .lean();
+
+        comment.replies = populatedComment.replies;
+        if (comment.replies.length > 0) {
+          await populateReplies(comment.replies);
+        }
+      }
+      return comments;
+    }
+    blog.comments = await populateReplies(blog.comments);
+
     if (!blog) {
       return res.status(404).json({
         message: "Blog not found",
       });
     }
-    const replyCheck = await Comment.findById("69943388ed05aa5fa2ce3e38");
+
     //FOR REPLIES
     const comments = await Comment.find({
       blogId: blog._id,
       parentComment: null,
-    })
-      .populate("user", "name email")
-      .populate({
-        path: "replies",
-        populate: {
-          path: "user",
-          select: "name email",
-        },
-      });
+    });
+
     return res.status(200).json({
       message: "Blog fetch successfully",
       blog,
