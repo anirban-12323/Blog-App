@@ -3,7 +3,6 @@ const Blog = require("../models/blogSchema");
 async function addComment(req, res) {
   try {
     const { blogId } = req.params;
-    console.log("blogId from params:", blogId);
 
     const { comment } = req.body;
     const creator = req.user.id;
@@ -113,74 +112,91 @@ async function likesComment(req, res) {
 
 async function editComment(req, res) {
   try {
-    const { commentId } = req.params;
-    const { comment } = req.body;
     const userId = req.user.id;
+    const { id } = req.params;
+    const { updatedCommentContent } = req.body;
 
-    if (!comment || !comment.trim()) {
-      return res.status(400).json({
-        message: "Comment cannot be empty",
-      });
-    }
+    const comment = await Comment.findById(id);
 
-    const existingComment = await Comment.findById(commentId);
-    if (!existingComment) {
+    if (!comment) {
       return res.status(404).json({
-        message: "Comment not found",
+        message: "comment not found",
       });
     }
 
-    if (existingComment.user.toString() !== userId) {
-      return res.status(403).json({
-        message: "Not authorized",
+    // validation
+
+    if (comment.user != userId) {
+      return res.status(404).json({
+        message: "You are not authorized to edit this comment",
       });
     }
+    const updatedComment = await Comment.findByIdAndUpdate(
+      id,
+      {
+        comment: updatedCommentContent,
+      },
+      { new: true },
+    ).then((comment) => {
+      return comment.populate({
+        path: "user",
+        select: "name email",
+      });
+    });
 
-    existingComment.comment = comment;
-    await existingComment.save();
-
-    const populatedComment = await Comment.findById(commentId).populate(
-      "user",
-      "name avatar",
-    );
-
-    res.status(200).json({
+    return res.status(200).json({
+      success: true,
       message: "Comment updated successfully",
-      comment: populatedComment,
+      updatedComment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
+    console.log(error);
   }
 }
 
 async function deleteComment(req, res) {
   try {
-    const { commentId } = req.params;
     const userId = req.user.id;
-    const existingComment = await Comment.findById(commentId);
-    if (!existingComment) {
-      return res.status(404).json({
-        message: "Comment not found",
-      });
-    }
-    if (existingComment.user.toString() !== userId) {
-      return res.status(403).json({
-        message: "not authorized",
-      });
-    }
-
-    await existingComment.deleteOne();
-
-    // 2️⃣ Decrement commentsCount in Blog
-    await Blog.findByIdAndUpdate(existingComment.blogId, {
-      $inc: { commentsCount: -1 },
+    const { id } = req.params;
+    const comment = await Comment.findById(id).populate({
+      path: "blogId",
+      select: "creator",
     });
 
-    res.status(200).json({ message: "Comment deleted", commentId });
+    if (!comment) {
+      return res.status(400).json({ message: "comment not found " });
+    }
+
+    if (comment.user != userId && comment.blogId.creator != userId) {
+      return res.status(400).json({
+        message: "you are not authorized",
+      });
+    }
+    async function deleteCommentAndReplies(id) {
+      let comment = await Comment.findById(id);
+
+      for (let replyId of comment.replies) {
+        await deleteCommentAndReplies(replyId);
+      }
+      if (comment.parentComment) {
+        await Comment.findByIdAndUpdate(comment.parentComment, {
+          $pull: { replies: id },
+        });
+      }
+      await Comment.findByIdAndDelete(id);
+    }
+    await deleteCommentAndReplies(id);
+
+    await Blog.findByIdAndUpdate(comment.blogId._id, {
+      $pull: { comments: id },
+    });
+    res.status(200).json({
+      success: true,
+      message: "Comment delete successfully",
+    });
   } catch (error) {
-    return res.status(500).json({
+    res.status(400).json({
+      success: false,
       message: error.message,
     });
   }

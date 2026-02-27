@@ -21,17 +21,28 @@ export const selectedBlogSlice = createSlice({
     },
     setCommentLikes(state, action) {
       let { commentId, userId } = action.payload;
-      let comment = state.comments.find((comment) => comment._id == commentId);
 
-      if (comment.likes.includes(userId)) {
-        // if user already like then remove
-        comment.likes = comment.likes.filter((like) => like !== userId);
-      } else {
-        //new user like
+      function toogleLike(comments) {
+        return comments.map((comment) => {
+          if (comment._id == commentId) {
+            if (comment.likes.includes(userId)) {
+              comment.likes = comment.likes.filter((like) => like !== userId);
+              return comment;
+            } else {
+              comment.likes = [...comment.likes, userId];
 
-        comment.likes = [...comment.likes, userId];
+              return comment;
+            }
+          }
+
+          if (comment.replies && comment.replies.length > 0) {
+            return { ...comment, replies: toogleLike(comment.replies) };
+          }
+          return comment;
+        });
       }
-      return state;
+
+      state.comments = toogleLike(state.comments);
     },
     setReplies(state, action) {
       let newReply = action.payload;
@@ -68,6 +79,33 @@ export const selectedBlogSlice = createSlice({
         comment._id == parentComment._id ? parentComment : comment,
       );
     },
+
+    setUpdatedComments(state, action) {
+      function updatedComment(comments) {
+        return comments.map((comment) =>
+          comment._id == action.payload._id
+            ? { ...comment, comment: action.payload.comment }
+            : comment.replies && comment.replies.length > 0
+              ? { ...comment, replies: updatedComment(comment.replies) }
+              : comment,
+        );
+      }
+
+      state.comments = updatedComment(state.comments);
+    },
+    deleteCommentAndReply(state, action) {
+      function deleteComment(comments) {
+        return comments
+          .filter((comment) => comment._id !== action.payload)
+          .map((comment) =>
+            comment.replies && comment.replies.length > 0
+              ? { ...comment, replies: deleteComment(comment.replies) }
+              : comment,
+          );
+      }
+
+      state.comments = deleteComment(state.comments);
+    },
   },
 });
 
@@ -77,5 +115,7 @@ export const {
   setComments,
   setCommentLikes,
   setReplies,
+  setUpdatedComments,
+  deleteCommentAndReply,
 } = selectedBlogSlice.actions;
 export default selectedBlogSlice.reducer;

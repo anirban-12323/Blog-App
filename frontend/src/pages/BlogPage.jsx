@@ -170,7 +170,7 @@ function BlogPage() {
                 className="fi fi-sr-comment-alt text-xl"
                 onClick={() => dispatch(setIsOpen())}
               />
-              <span>{comments.length || 0}</span>
+              <span>{comments?.length || 0}</span>
             </div>
           </div>
         </div>

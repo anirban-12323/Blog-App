@@ -18,8 +18,8 @@ route.post("/blogs/:blogId/comment", verifyUser, addComment);
 route.get("/blogs/:blogId/comments", getCommentsByBlog);
 route.post("/comments/:commentId/like", verifyUser, likesComment);
 
-route.put("/comments/:commentId", verifyUser, editComment);
-route.delete("/comments/:commentId", verifyUser, deleteComment);
+route.patch("/blogs/edit-comment/:id", verifyUser, editComment);
+route.delete("/blogs/comment/:id", verifyUser, deleteComment);
 route.get("/blogs/:blogId/comments/count", getCommentCount);
 
 route.post("/comment/:parentCommentId/:blogId", verifyUser, addNestedComment);
