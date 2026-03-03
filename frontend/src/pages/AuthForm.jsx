@@ -18,7 +18,9 @@ import { login } from "../utils/userSlice";
 import Input from "../components/Input";
 import loginImg from "../assets/loginImg.png";
 import registerImg from "../assets/registerImg.png";
+import googleIcon from "../assets/googleIcon.svg";
 import { useNavigate } from "react-router-dom";
+import { googleAuth } from "../utils/firebase";
 
 // Reusable Authentication Form Component
 // It works for both Sign In and Sign Up based on "type" prop
@@ -45,44 +47,22 @@ function AuthForm({ type }) {
   async function handleAuthForm(e) {
     e.preventDefault(); // Prevent page reload on form submit
 
-    // Prepare payload based on auth type
-    // If signup → send name, email, password
-    // If signin → send only email and password
-    const payload =
-      type === "signup"
-        ? userData
-        : {
-            email: userData.email,
-            password: userData.password,
-          };
-
     try {
       // Send POST request to backend
       // URL becomes /signup or /signin dynamically
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/${type}`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        userData,
       );
-
-      // Extract token separately from user object
-      const { token, ...userWithoutToken } = res.data.user;
-
-      // Store authenticated user data + token in Redux
-      dispatch(
-        login({
-          user: userWithoutToken,
-          token,
-        }),
-      );
-
-      // Show success message
-      toast.success(res.data.message || "Success");
-      navigate("/");
+      if (type == "signup") {
+        // console.log(res.data.message);
+        toast.success(res.data.message);
+        navigate("/signin");
+      } else {
+        dispatch(login(res.data.user));
+        toast.success(res.data.message);
+        navigate("/");
+      }
     } catch (error) {
       // Show error message if request fails
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -92,6 +72,26 @@ function AuthForm({ type }) {
         email: "",
         password: "",
       });
+    }
+  }
+
+  async function handleGoogleAuth() {
+    try {
+      let data = await googleAuth();
+
+      let res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/google-auth`,
+        {
+          accessToken: data.accessToken,
+        },
+      );
+
+      toast.success(res?.data?.message);
+      dispatch(login(res?.data?.user));
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   }
 
@@ -151,6 +151,17 @@ function AuthForm({ type }) {
             {type == "signin" ? "Login" : "Register"}
           </button>
         </form>
+        <p className="mt-5 text-center w-full">or</p>
+
+        <div
+          className="bg-white w-full flex gap-2  items-center justify-center overflow-hidden rounded-full py-1 px-2 text-black"
+          onClick={handleGoogleAuth}
+        >
+          <div>
+            <img className="w-8 h-8" src={googleIcon} alt="" />
+          </div>
+          <p className="text-2xl font-medium">continue with</p>
+        </div>
 
         {/* Navigation link switches between Sign In and Sign Up */}
         {type == "signin" ? (

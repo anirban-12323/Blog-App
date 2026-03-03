@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema({
       ref: "Blog",
     },
   ],
+  googleAuth: {
+    type: Boolean,
+    default: false,
+  },
+  isVerify: {
+    type: Boolean,
+    default: false,
+  },
   password: String,
 });
 
