@@ -9,6 +9,7 @@ const {
   login,
   verifyToken,
   googleAuth,
+  followUsers,
 } = require("../controllers/userController");
 const verifyUser = require("../middlewares/auth");
 const route = express.Router();
@@ -26,5 +27,7 @@ route.delete("/users/:id", deleteUserByID);
 
 route.get("/verify-email/:verificationToken", verifyToken);
 route.post("/google-auth", googleAuth);
+
+route.patch("/follow-creator/:id", verifyUser, followUsers);
 
 module.exports = route;

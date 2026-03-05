@@ -418,7 +418,47 @@ async function deleteUserByID(req, res) {
     });
   }
 }
-//save blog controller
+//follow/unfollow controller
+
+async function followUsers(req, res) {
+  try {
+    //id , who follow the creator
+    const followerId = req.user.id;
+    //the creator id
+    const { id } = req.params;
+
+    //here the user is creator
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(500).json({
+        message: "user is not found",
+      });
+    }
+
+    if (!user.followers.includes(followerId)) {
+      await User.findByIdAndUpdate(id, { $set: { followUsers: followerId } });
+      await User.findByIdAndUpdate(followerId, { $set: { following: id } });
+
+      return res.status(200).json({
+        success: true,
+        message: "Follow",
+      });
+    } else {
+      await User.findByIdAndUpdate(id, { $unset: { followUsers: followerId } });
+      await User.findByIdAndUpdate(followerId, { $unset: { following: id } });
+
+      return res.status(200).json({
+        success: true,
+        message: "unfollow",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
 
 module.exports = {
   createUser,
@@ -429,4 +469,5 @@ module.exports = {
   login,
   verifyToken,
   googleAuth,
+  followUsers,
 };

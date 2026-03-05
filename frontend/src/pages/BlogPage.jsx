@@ -13,10 +13,26 @@ import Comment from "../components/Comment";
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { formatDate } from "../utils/formDate";
 export async function handleSaveBlogs(id, token) {
   try {
     let res = await axios.patch(
       `${import.meta.env.VITE_BACKEND_URL}/save-blog/${id}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    toast.success(res.data.message);
+  } catch (error) {
+    toast.error(error.response.data.message);
+  }
+}
+
+export async function handleFollowCreator(id, token) {
+  try {
+    let res = await axios.patch(
+      `${import.meta.env.VITE_BACKEND_URL}/follow-creator/${id}`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -130,7 +146,35 @@ function BlogPage() {
           {blogData.title}
         </h1>
 
-        <p className="mt-3 text-lg text-gray-600">{blogData.creator.name}</p>
+        <div className=" flex items-center my-5 gap-3">
+          <div>
+            <div className="w-8 h-8">
+              <img
+                src={`https://api.dicebear.com/9.x/initials/svg?seed=${blogData?.creator?.name}`}
+                alt=""
+                className="rounded-full"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <div className=" flex items-center gap-2">
+              <h2 className=" text-xl text-gray-600">
+                {blogData.creator.name}
+              </h2>
+              <p>.</p>
+              <p
+                className="text-lg font-medium text-green-400"
+                onClick={() => handleFollowCreator(blogData.creator._id, token)}
+              >
+                follow
+              </p>
+            </div>
+            <div>
+              <span>6 min read</span>
+              <span className="mx-2">{formatDate(blogData.createdAt)}</span>
+            </div>
+          </div>
+        </div>
 
         {/* =========================
             COVER IMAGE (CONTROLLED)
