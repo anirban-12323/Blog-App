@@ -9,6 +9,7 @@ const {
   deleteBlog,
   dislikeBlog,
   likeBlog,
+  saveBlog,
 } = require("../controllers/blogController");
 
 const verifyUser = require("../middlewares/auth");
@@ -25,4 +26,5 @@ route.delete("/blogs/:id", verifyUser, deleteBlog);
 //like and dislike
 route.post("/blogs/like/:id", verifyUser, likeBlog);
 route.post("/blogs/:id/dislike", verifyUser, dislikeBlog);
+route.patch("/save-blog/:id", verifyUser, saveBlog);
 module.exports = route;

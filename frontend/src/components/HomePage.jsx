@@ -3,16 +3,20 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDate } from "../utils/formDate";
 import { useSelector } from "react-redux";
+import { handleSaveBlogs } from "../pages/BlogPage";
 
 function HomePage() {
   const [blogs, setBlogs] = useState([]);
   const { comments } = useSelector((state) => state.selectedBlog);
+  const { token } = useSelector((state) => state.user);
+  const { id: userId } = useSelector((state) => state.user.user);
 
   async function fetchBlogs() {
     let res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/blogs`);
     console.log(res.data.blogs);
     setBlogs(res.data.blogs);
   }
+
   useEffect(() => {
     fetchBlogs();
   }, []);
@@ -39,6 +43,19 @@ function HomePage() {
                   <div className=" flex gap-2">
                     <i className="fi fi-sr-comment-alt text-xl mt-1"></i>
                     <p className="text-xl">{comments?.length}</p>
+                  </div>
+                  <div
+                    className=" flex gap-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSaveBlogs(blog._id, token);
+                    }}
+                  >
+                    {blog?.totalSaves?.includes(userId) ? (
+                      <i className="fi fi-sr-bookmark text-xl "></i>
+                    ) : (
+                      <i className="fi fi-br-bookmark text-xl "></i>
+                    )}
                   </div>
                 </div>
               </div>

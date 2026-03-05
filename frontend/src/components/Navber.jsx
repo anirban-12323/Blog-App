@@ -1,29 +1,29 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { logout } from "../utils/userSlice";
 
 function Navber() {
   const { token } = useSelector((state) => state.user);
   const { name } = useSelector((state) => state.user.user || {});
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleWriteClick = () => {
     navigate("/add-blog");
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowPopup(false);
+  };
   return (
-    // <div className="flex-none w-full h-full flex flex-col items-center overflow-x-hidden">
-    //   <div className="w-full bg-gray-700 h-[60px] flex items-center px-6 shadow-md">
-    //     <h1 className="text-white text-2xl font-bold tracking-wide">
-    //       Blog<span className="text-yellow-400">App</span>
-    //     </h1>
-    //   </div>
-
-    //   <Outlet />
-    // </div>
-
     <>
-      <div className="bg-white max-w-full flex justify-between items-center h-[60px] px-10 border-b drop-shadow-sm">
+      <div className="bg-white max-w-full flex justify-between  relative items-center h-[60px] px-10 border-b drop-shadow-sm">
         <div className="flex justify-between gap-4 items-center">
           <Link to={"/"}>
             <div>
@@ -48,7 +48,14 @@ function Navber() {
           </div>
 
           {token ? (
-            <div className="text-xl capitalize">{name || "User"}</div>
+            <div className="w-8 h-8">
+              <img
+                src={`https://api.dicebear.com/9.x/initials/svg?seed=${name}`}
+                alt=""
+                className="rounded-full"
+                onClick={() => setShowPopup((prev) => !prev)}
+              />
+            </div>
           ) : (
             <div className="flex gap-1">
               <Link to={"/signup"}>
@@ -65,6 +72,16 @@ function Navber() {
             </div>
           )}
         </div>
+
+        {showPopup ? (
+          <div className="w-[150px] h-[130px] bg-gray-100  drop-shadow-xl absolute right-2 top-12 rounded-xl ">
+            <p className=" popup rounded-t-xl">Profile</p>
+            <p className=" popup rounded-b-xl ">Setting</p>
+            <p className=" popup rounded-b-xl  " onClick={handleLogout}>
+              Logout
+            </p>
+          </div>
+        ) : null}
       </div>
       <Outlet />
     </>

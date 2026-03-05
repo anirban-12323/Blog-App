@@ -1,6 +1,13 @@
 @import "@flaticon/flaticon-uicons/css/all/all";
 @import "tailwindcss";
 
+@layer components {
+  .popup{
+    /* Use @apply to inline existing Tailwind utilities */
+    @apply text-lg px-3 py-2 hover:bg-blue-300   hover:text-white hover:cursor-pointer;
+  }
+}
+
 /* TipTap List Fix */
 .ProseMirror ul {
   list-style-type: disc;

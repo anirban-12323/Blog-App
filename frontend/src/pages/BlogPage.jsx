@@ -13,12 +13,27 @@ import Comment from "../components/Comment";
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-
+export async function handleSaveBlogs(id, token) {
+  try {
+    let res = await axios.patch(
+      `${import.meta.env.VITE_BACKEND_URL}/save-blog/${id}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    toast.success(res.data.message);
+  } catch (error) {
+    toast.error(error.response.data.message);
+  }
+}
 function BlogPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const { token, user, id: userId } = useSelector((s) => s.user);
+  const { token, user } = useSelector((state) => state.user);
+
+  const { id: userId } = useSelector((state) => state.user.user);
   const { comments } = useSelector((state) => state.selectedBlog);
 
   const [blogData, setBlogData] = useState(null);
@@ -171,6 +186,17 @@ function BlogPage() {
                 onClick={() => dispatch(setIsOpen())}
               />
               <span>{comments?.length || 0}</span>
+            </div>
+
+            <div
+              className=" flex gap-2"
+              onClick={() => handleSaveBlogs(blogData._id, token)}
+            >
+              {blogData?.totalSaves?.includes(userId) ? (
+                <i className="fi fi-sr-bookmark text-xl "></i>
+              ) : (
+                <i className="fi fi-br-bookmark text-xl "></i>
+              )}
             </div>
           </div>
         </div>

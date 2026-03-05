@@ -2,6 +2,7 @@ const User = require("../models/userSchema");
 const bcrypt = require("bcrypt");
 const { generateJWT, verifyJWT } = require("../utils/generateToken");
 const transporter = require("../utils/transporter");
+const uniqid = require("uniqid");
 
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
@@ -146,11 +147,13 @@ async function createUser(req, res) {
     }
 
     const hashPass = await bcrypt.hash(password, 12);
-
+    const username =
+      email.split("@")[0].toLowerCase().trim() + uniqid().slice(0, 5);
     const newUser = await User.create({
       name,
       email,
       password: hashPass,
+      username,
     });
     const newUserObj = newUser.toObject();
     delete newUserObj.password;
@@ -415,6 +418,8 @@ async function deleteUserByID(req, res) {
     });
   }
 }
+//save blog controller
+
 module.exports = {
   createUser,
   getUser,

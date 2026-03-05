@@ -46,16 +46,17 @@ const blogSchema = new mongoose.Schema(
       },
     ],
 
+    totalSaves: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
+
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment",
-      },
-    ],
-    dislikes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
       },
     ],
   },

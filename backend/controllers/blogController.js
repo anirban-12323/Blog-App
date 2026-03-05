@@ -280,44 +280,38 @@ async function updateBlog(req, res) {
 
 async function likeBlog(req, res) {
   try {
-    const userId = req.user.id;
+    const user = req.user.id;
     const { id } = req.params;
     const blog = await Blog.findById(id);
+
     if (!blog) {
-      return res.status(404).json({
-        message: "blog not found",
+      return res.status(500).json({
+        message: "Blog is not found",
       });
     }
 
-    //if already like , remove like
+    if (!blog.likes.includes(user)) {
+      await Blog.findByIdAndUpdate(id, { $push: { likes: user } });
+      await User.findByIdAndUpdate(user, { $push: { likeBlogs: id } });
 
-    if (blog.likes.includes(userId)) {
-      await Blog.findByIdAndUpdate(id, {
-        $pull: { likes: userId },
-      });
       return res.status(200).json({
-        message: "liked removed",
+        success: true,
+        message: "Blog Liked successfully",
+        isLiked: true,
+      });
+    } else {
+      await Blog.findByIdAndUpdate(id, { $pull: { likes: user } });
+
+      await User.findByIdAndUpdate(user, { $pull: { likeBlogs: id } });
+
+      return res.status(200).json({
+        success: true,
+        message: "Blog DisLiked successfully",
+        isLiked: false,
       });
     }
-
-    //dislike before remove dislike
-
-    await Blog.findByIdAndUpdate(id, {
-      $pull: {
-        dislikes: userId,
-      },
-    });
-
-    //add like
-
-    await Blog.findByIdAndUpdate(id, {
-      $addToSet: { likes: userId },
-    });
-    return res.status(200).json({
-      message: "Blog Liked",
-    });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -404,6 +398,43 @@ async function deleteBlog(req, res) {
   }
 }
 
+async function saveBlog(req, res) {
+  try {
+    const user = req.user.id;
+    const { id } = req.params;
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(500).json({
+        message: "Blog is not found",
+      });
+    }
+
+    if (!blog.totalSaves.includes(user)) {
+      await Blog.findByIdAndUpdate(id, { $set: { totalSaves: user } });
+      await User.findByIdAndUpdate(user, { $set: { saveBlogs: id } });
+
+      return res.status(200).json({
+        success: true,
+        message: "Blog has been saved successfully",
+      });
+    } else {
+      await Blog.findByIdAndUpdate(id, { $unset: { totalSaves: user } });
+
+      await User.findByIdAndUpdate(user, { $unset: { saveBlogs: id } });
+
+      return res.status(200).json({
+        success: true,
+        message: "Removed from saved blogs",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
 module.exports = {
   createBlog,
   getBlogs,
@@ -412,6 +443,7 @@ module.exports = {
   deleteBlog,
   likeBlog,
   dislikeBlog,
+  saveBlog,
 };
 
 //(req,res)=>{
