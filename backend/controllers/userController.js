@@ -6,6 +6,10 @@ const uniqid = require("uniqid");
 
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
+const {
+  deleteImagefromCloudinary,
+  uploadImage,
+} = require("../utils/uploadImage");
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -309,6 +313,9 @@ async function login(req, res) {
         name: chekedforexitingUser.name,
         email: chekedforexitingUser.email,
         id: chekedforexitingUser._id,
+        profilepic: chekedforexitingUser.profilepic,
+        username: chekedforexitingUser.username,
+        bio: chekedforexitingUser.bio,
         token,
       },
     });
@@ -340,9 +347,17 @@ async function getUser(req, res) {
 
 async function getUserBYID(req, res) {
   try {
-    const id = req.params.id;
-    const user = await User.findById({ _id: id });
+    const username = req.params.username;
+    const user = await User.findOne({ username })
+      .populate("blogs followers following  likeBlogs  saveBlogs")
+      .populate({
+        path: "followers  following",
+        select: "name username",
+      })
+      .select("-isVerify -password");
 
+    // console.log(user);
+    console.log(user);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -365,24 +380,64 @@ async function getUserBYID(req, res) {
 async function updateUser(req, res) {
   try {
     const id = req.params.id;
-    const { name, password, email } = req.body;
 
-    const UpdateUser = await User.findByIdAndUpdate(
-      id,
-      { name, password, email },
-      { new: true },
-    );
+    const { name, username, bio } = req.body;
 
-    if (!UpdateUser) {
-      return res.status(400).json({
-        success: false,
-        message: "user not found",
-      });
+    const image = req.file;
+
+    const user = await User.findById(id);
+
+    if (!req.body.profilepic) {
+      if (user.profilepicId) {
+        await deleteImagefromCloudinary(user.profilepicId);
+      }
+      user.profilepic = null;
+      user.profilepicId = null;
     }
+
+    if (image) {
+      if (user.profilepicId) {
+        await deleteImagefromCloudinary(user.profilepicId);
+      }
+
+      const uploadResult = await uploadImage(image.buffer);
+      if (!uploadResult) {
+        return res.status(500).json({
+          message: "Cover image upload failed",
+        });
+      }
+      const { secure_url, public_id } = await uploadResult;
+
+      user.profilepic = secure_url;
+      user.profilepicId = public_id;
+    }
+
+    if (user.username !== username) {
+      const findUser = await User.findOne(username);
+
+      if (findUser) {
+        return res.status(400).json({
+          success: false,
+          message: "username is already taken",
+        });
+      }
+    }
+
+    user.username = username;
+    user.bio = bio;
+    user.name = name;
+
+    await user.save();
+
     return res.status(200).json({
       success: true,
       message: "user updated successfully",
-      UpdateUser,
+      user: {
+        name: user.name,
+        username: user.username,
+        bio: user.bio,
+        profilepic: user.profilepic,
+      },
     });
   } catch (error) {
     return res.status(400).json({
@@ -437,7 +492,7 @@ async function followUsers(req, res) {
     }
 
     if (!user.followers.includes(followerId)) {
-      await User.findByIdAndUpdate(id, { $set: { followUsers: followerId } });
+      await User.findByIdAndUpdate(id, { $set: { followers: followerId } });
       await User.findByIdAndUpdate(followerId, { $set: { following: id } });
 
       return res.status(200).json({
@@ -445,7 +500,7 @@ async function followUsers(req, res) {
         message: "Follow",
       });
     } else {
-      await User.findByIdAndUpdate(id, { $unset: { followUsers: followerId } });
+      await User.findByIdAndUpdate(id, { $unset: { followers: followerId } });
       await User.findByIdAndUpdate(followerId, { $unset: { following: id } });
 
       return res.status(200).json({

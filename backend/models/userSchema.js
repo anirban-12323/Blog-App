@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    profilepicId: {
+      type: String,
+      default: null,
+    },
     email: {
       type: String,
       unique: true,

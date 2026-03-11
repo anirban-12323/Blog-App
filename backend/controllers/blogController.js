@@ -46,16 +46,15 @@ async function createBlog(req, res) {
     const coverImage = req.file;
 
     // ❗ COVER IMAGE IS REQUIRED
-    if (!coverImage || !coverImage.path) {
+    if (!coverImage || !coverImage.buffer) {
       return res.status(400).json({
         message: "Cover image is required",
       });
     }
 
     // UPLOAD COVER IMAGE
-    const uploadResult = await uploadImage(coverImage.path);
+    const uploadResult = await uploadImage(coverImage.buffer);
     if (!uploadResult) {
-      fs.unlinkSync(coverImage.path);
       return res.status(500).json({
         message: "Cover image upload failed",
       });
@@ -65,8 +64,6 @@ async function createBlog(req, res) {
     const coverImageId = uploadResult.public_id;
 
     //remove temp file
-
-    fs.unlinkSync(coverImage.path);
 
     // BLOG ID
     const blogId =
@@ -134,7 +131,7 @@ async function getBlog(req, res) {
       })
       .populate({
         path: "creator",
-        select: "name email followers",
+        select: "name email followers username",
       })
       .lean();
 

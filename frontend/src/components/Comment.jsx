@@ -285,7 +285,7 @@ function DisplayComments({
                       </div>
                     ) : (
                       <i
-                        class="fi fi-bs-menu-dots"
+                        className="fi fi-bs-menu-dots"
                         onClick={() => setCurrentPopup(c._id)}
                       ></i>
                     )

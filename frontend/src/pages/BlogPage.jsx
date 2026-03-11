@@ -49,7 +49,7 @@ function BlogPage() {
 
   const { token, user } = useSelector((state) => state.user);
 
-  const { id: userId } = useSelector((state) => state.user.user);
+  const { id: userId } = useSelector((state) => state.user.user || {});
   const { comments } = useSelector((state) => state.selectedBlog);
 
   const [blogData, setBlogData] = useState(null);
@@ -135,7 +135,7 @@ function BlogPage() {
   }, [id]);
 
   if (!blogData) return <h1 className="text-center">Loading…</h1>;
-
+  console.log(blogData?.creator?.username);
   return (
     <div className="max-w-[1100px] mx-auto px-4">
       {/* =========================
@@ -147,19 +147,21 @@ function BlogPage() {
         </h1>
 
         <div className=" flex items-center my-5 gap-3">
-          <div>
-            <div className="w-8 h-8">
-              <img
-                src={`https://api.dicebear.com/9.x/initials/svg?seed=${blogData?.creator?.name}`}
-                alt=""
-                className="rounded-full"
-              />
+          <Link to={`/@${blogData?.creator?.username}`}>
+            <div>
+              <div className="w-8 h-8">
+                <img
+                  src={`https://api.dicebear.com/9.x/initials/svg?seed=${blogData?.creator?.name}`}
+                  alt=""
+                  className="rounded-full"
+                />
+              </div>
             </div>
-          </div>
+          </Link>
           <div className="flex flex-col">
             <div className=" flex items-center gap-2">
               <h2 className=" text-xl text-gray-600">
-                {blogData.creator.name}
+                {blogData?.creator?.name}
               </h2>
               <p>.</p>
               <p
@@ -175,7 +177,6 @@ function BlogPage() {
             </div>
           </div>
         </div>
-
         {/* =========================
             COVER IMAGE (CONTROLLED)
         ========================= */}
@@ -192,13 +193,12 @@ function BlogPage() {
             "
           />
         </div>
-
         {/* =========================
             ACTION BAR
         ========================= */}
         <div className="flex items-center justify-between mt-5">
-          {token && user.email === blogData.creator.email && (
-            <Link to={`/edit/${blogData.blogId}`}>
+          {token && user.email === blogData?.creator?.email && (
+            <Link to={`/edit/${blogData?.blogId}`}>
               <button className="bg-green-500 px-4 py-1 text-white rounded">
                 Edit
               </button>
@@ -217,7 +217,7 @@ function BlogPage() {
                     : "fi-rr-social-network"
                 } text-xl`}
               />
-              <span>{blogData.likes.length}</span>
+              <span>{blogData?.likes?.length}</span>
             </div>
 
             <div
@@ -244,7 +244,6 @@ function BlogPage() {
             </div>
           </div>
         </div>
-
         {/* =========================
             BLOG CONTENT (TipTap)
         ========================= */}

@@ -6,7 +6,8 @@ import Navber from "./components/Navber";
 import HomePage from "./components/HomePage";
 import AddBlog from "./pages/AddBlog";
 import BlogPage from "./pages/BlogPage";
-import Comment from "./components/Comment";
+import ProfilePage from "./pages/ProfilePage";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   return (
@@ -25,6 +26,9 @@ function App() {
           path="/verify-email/:verificationToken"
           element={<VerifyUser />}
         />
+
+        <Route path="/:username" element={<ProfilePage />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Route>
 
       {/* Other routes */}

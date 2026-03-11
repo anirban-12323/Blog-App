@@ -9,7 +9,7 @@ function HomePage() {
   const [blogs, setBlogs] = useState([]);
   const { comments } = useSelector((state) => state.selectedBlog);
   const { token } = useSelector((state) => state.user);
-  const { id: userId } = useSelector((state) => state.user.user);
+  const { id: userId } = useSelector((state) => state.user.user) || {};
 
   async function fetchBlogs() {
     let res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/blogs`);
@@ -28,7 +28,7 @@ function HomePage() {
             <div className="w-[60%] flex flex-col gap-3">
               <div>
                 {/* <img src="" alt="" /> */}
-                <p>{blog.creator.name} </p>
+                <p>{blog?.creator?.name} </p>
               </div>
               <h2 className="font-blod text-3xl">{blog.title}</h2>
               <h4 className="line-clamp-2">{blog.description}</h4>
@@ -60,11 +60,11 @@ function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="w-[30%] object-cover rounded-xl">
+            <div className="w-[40%] sm:w-[30%] max-xsm:w-full">
               <img
                 src={blog.image}
                 alt=""
-                className="w-full h-54 object-cover rounded-xl"
+                className="aspect-video object-cover w-full"
               />
             </div>
           </div>

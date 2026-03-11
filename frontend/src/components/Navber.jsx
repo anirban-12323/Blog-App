@@ -7,7 +7,9 @@ import { logout } from "../utils/userSlice";
 
 function Navber() {
   const { token } = useSelector((state) => state.user);
-  const { name } = useSelector((state) => state.user.user || {});
+  const { name, username, profilepic } = useSelector(
+    (state) => state.user.user || {},
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -20,6 +22,7 @@ function Navber() {
   const handleLogout = () => {
     dispatch(logout());
     setShowPopup(false);
+    navigate("/");
   };
   return (
     <>
@@ -48,11 +51,15 @@ function Navber() {
           </div>
 
           {token ? (
-            <div className="w-8 h-8">
+            <div className="w-10 h-10 rounded-full overflow-hidden">
               <img
-                src={`https://api.dicebear.com/9.x/initials/svg?seed=${name}`}
+                src={
+                  profilepic
+                    ? profilepic
+                    : `https://api.dicebear.com/9.x/initials/svg?seed=${name}`
+                }
                 alt=""
-                className="rounded-full"
+                className="w-full h-full object-cover cursor-pointer"
                 onClick={() => setShowPopup((prev) => !prev)}
               />
             </div>
@@ -74,8 +81,14 @@ function Navber() {
         </div>
 
         {showPopup ? (
-          <div className="w-[150px] h-[130px] bg-gray-100  drop-shadow-xl absolute right-2 top-12 rounded-xl ">
-            <p className=" popup rounded-t-xl">Profile</p>
+          <div className="w-[150px] h-[180px] bg-gray-100  drop-shadow-xl absolute right-2 top-12 rounded-xl ">
+            <Link to={`/@${username}`}>
+              <p className="popup rounded-t-xl">Profile</p>
+            </Link>
+            <Link to={`/edit-profile`}>
+              <p className="popup ">Edit Profile</p>
+            </Link>
+            {/* <p className=" popup rounded-t-xl">Edit Profile</p> */}
             <p className=" popup rounded-b-xl ">Setting</p>
             <p className=" popup rounded-b-xl  " onClick={handleLogout}>
               Logout

@@ -1,4 +1,5 @@
 const express = require("express");
+const upload = require("../utils/multer");
 
 const {
   createUser,
@@ -19,9 +20,9 @@ route.post("/signin", login);
 
 route.get("/users", getUser);
 
-route.get("/users/:id", getUserBYID);
+route.get("/users/:username", getUserBYID);
 
-route.patch("/users/:id", updateUser);
+route.patch("/users/:id", upload.single("profilepic"), updateUser);
 
 route.delete("/users/:id", deleteUserByID);
 
