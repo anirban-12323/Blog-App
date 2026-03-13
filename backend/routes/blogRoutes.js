@@ -10,6 +10,7 @@ const {
   dislikeBlog,
   likeBlog,
   saveBlog,
+  searchBlog,
 } = require("../controllers/blogController");
 
 const verifyUser = require("../middlewares/auth");
@@ -22,6 +23,8 @@ route.get("/blogs/:blogId", getBlog);
 route.patch("/blogs/:id", verifyUser, upload.single("image"), updateBlog);
 
 route.delete("/blogs/:id", verifyUser, deleteBlog);
+//search blog
+route.get("/search-blog", searchBlog);
 
 //like and dislike
 route.post("/blogs/like/:id", verifyUser, likeBlog);

@@ -1,9 +1,11 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import axios from "axios";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { logout } from "../utils/userSlice";
+import { useEffect } from "react";
 
 function Navber() {
   const { token } = useSelector((state) => state.user);
@@ -14,6 +16,7 @@ function Navber() {
   const dispatch = useDispatch();
 
   const [showPopup, setShowPopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(null);
 
   const handleWriteClick = () => {
     navigate("/add-blog");
@@ -24,6 +27,16 @@ function Navber() {
     setShowPopup(false);
     navigate("/");
   };
+
+  useEffect(() => {
+    if (window.location.pathname !== "/search") {
+      setSearchQuery(null);
+    }
+
+    if (window.location.pathname !== "/") {
+      setShowPopup(false);
+    }
+  }, [window.location.pathname]);
   return (
     <>
       <div className="bg-white max-w-full flex justify-between  relative items-center h-[60px] px-10 border-b drop-shadow-sm">
@@ -39,6 +52,15 @@ function Navber() {
               type="text"
               className="bg-gray-300 outline-none focus:outline-none  rounded-full pl-10 p-2"
               placeholder="Search"
+              value={searchQuery ? searchQuery : ""}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.code == "Enter") {
+                  if (searchQuery.trim()) {
+                    navigate(`/search?q=${searchQuery.trim()}`);
+                  }
+                }
+              }}
             />
           </div>
         </div>

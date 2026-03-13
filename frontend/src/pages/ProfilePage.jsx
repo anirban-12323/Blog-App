@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { handleFollowCreator, handleSaveBlogs } from "./BlogPage";
 import { useSelector } from "react-redux";
 import { formatDate } from "../utils/formDate";
+import DisplayBlogs from "../components/DisplayBlogs";
 
 const ProfilePage = () => {
   const { username } = useParams();
@@ -43,7 +44,7 @@ const ProfilePage = () => {
             </div>
             <div>
               {userData.blogs.map((blog) => (
-                <Link key={blog._id} to={"blog/" + blog.blogId}>
+                <Link key={blog._id} to={"/blog/" + blog.blogId}>
                   <div className=" w-full my-5 flex justify-between">
                     <div className="w-[60%] flex flex-col gap-3">
                       <div>

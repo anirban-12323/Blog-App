@@ -8,6 +8,7 @@ import AddBlog from "./pages/AddBlog";
 import BlogPage from "./pages/BlogPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfile from "./pages/EditProfile";
+import SearchBlogs from "./pages/SearchBlogs";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/add-blog" element={<AddBlog />} />
         <Route path="/blog/:id" element={<BlogPage />} />
         <Route path="/edit/:id" element={<AddBlog />} />
+        <Route path="/search" element={<SearchBlogs />} />
         <Route
           path="/verify-email/:verificationToken"
           element={<VerifyUser />}
