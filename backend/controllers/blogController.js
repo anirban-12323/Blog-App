@@ -23,24 +23,37 @@ async function createBlog(req, res) {
     const creator = isValid.id;
 
     // 📦 BODY
-    const { title, description, draft } = req.body;
+    const { title, description } = req.body;
+    const draft = req.body.draft === "true";
 
-    if (!title || !description || !req.body.content) {
+    const content = JSON.parse(req.body.content);
+    const tags = JSON.parse(req.body.tags);
+
+    if (!title) {
       return res.status(400).json({
-        message: "Title, description and content are required",
+        message: "Please add title field",
+      });
+    }
+
+    if (!description) {
+      return res.status(400).json({
+        message: "Please add description field",
+      });
+    }
+
+    if (!content) {
+      return res.status(400).json({
+        message: "Please add some content",
       });
     }
 
     // 🧾 PARSE TIPTAP CONTENT  (TEXT ONLY)
 
-    let content;
-    try {
-      content = JSON.parse(req.body.content);
-    } catch (error) {
-      return res.status(400).json({
-        message: "Invalid content format",
-      });
-    }
+    // try {
+    //   content = JSON.parse(req.body.content);
+    // } catch (error) {
+    //   console.log(error);
+    // }
 
     // 🖼️ COVER IMAGE (SINGLE FILE)
     const coverImage = req.file;
@@ -82,12 +95,19 @@ async function createBlog(req, res) {
       image: coverImageUrl,
       imageId: coverImageId,
       content, //TIPTAP JSON (text only)
+      tags,
     });
 
     await User.findByIdAndUpdate(creator, {
       $push: { blogs: blog._id },
     });
 
+    if (draft) {
+      console.log(draft);
+      return res.status(200).json({
+        message: "Blog save as draft.You can public it from your profile",
+      });
+    }
     return res.status(201).json({
       message: "Blog created successfully",
       blog,
@@ -194,7 +214,6 @@ async function getBlog(req, res) {
 
 async function updateBlog(req, res) {
   try {
-    console.log("update blog running..");
     const blogId = req.params.id;
     // 🔐 AUTHTICATION
     const token = req.headers.authorization?.split(" ")[1];
@@ -226,6 +245,7 @@ async function updateBlog(req, res) {
         message: "title,description and content required",
       });
     }
+    const tags = JSON.parse(req.body.tags);
     let content; //TIPTAP text
 
     try {
@@ -274,7 +294,7 @@ async function updateBlog(req, res) {
     blog.content = content;
     blog.image = imageUrl;
     blog.imageId = imageId;
-
+    blog.tags = tags || blog.tags;
     await blog.save();
 
     return res.status(200).json({

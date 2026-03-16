@@ -59,6 +59,9 @@ const blogSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    tags: {
+      type: [String],
+    },
   },
   { timestamps: true },
 );
