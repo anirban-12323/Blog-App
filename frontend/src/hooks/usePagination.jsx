@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 function usePagination(path, queryParams = {}, limit = 1, page = 1) {
   const [hasMore, setHasMore] = useState(true);
@@ -22,6 +23,8 @@ function usePagination(path, queryParams = {}, limit = 1, page = 1) {
         setHasMore(res.data.hasMore);
       } catch (error) {
         setBlogs([]);
+        toast.error(error.response.data.message);
+        setHasMore(false);
         console.log(error);
       }
     }

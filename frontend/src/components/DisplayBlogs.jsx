@@ -17,7 +17,7 @@ const DisplayBlogs = ({ blogs }) => {
                 {/* <img src="" alt="" /> */}
                 <p>{blog?.creator?.name} </p>
               </div>
-              <h2 className="font-blod text-3xl">{blog.title}</h2>
+              <h2 className="font-bold text-2xl sm:text-3xl">{blog.title}</h2>
               <h4 className="line-clamp-2">{blog.description}</h4>
               <div className="flex gap-3">
                 <p>{formatDate(blog.createdAt)}</p>
@@ -47,7 +47,7 @@ const DisplayBlogs = ({ blogs }) => {
                 </div>
               </div>
             </div>
-            <div className="w-[40%] sm:w-[30%] max-xsm:w-full">
+            <div className="w-[40%] sm:w-[35%] max-xsm:w-full">
               <img
                 src={blog.image}
                 alt=""

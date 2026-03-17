@@ -468,16 +468,25 @@ async function saveBlog(req, res) {
 
 async function searchBlog(req, res) {
   try {
+    const { search, tag } = req.query;
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
     const skip = (page - 1) * limit;
-    const { search } = req.query;
-    const query = {
-      $or: [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ],
-    };
+
+    let query;
+
+    if (tag) {
+      // query = { tags: tag };
+      query.tags = { $regex: `^${tag}$`, $options: "i" };
+    } else {
+      query = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
     const blogs = await Blog.find(query, { draft: false })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -502,6 +511,61 @@ async function searchBlog(req, res) {
     });
   }
 }
+
+// async function searchBlog(req, res) {
+//   try {
+//     const { search, tag } = req.query;
+
+//     const page = parseInt(req.query.page);
+//     const limit = parseInt(req.query.limit);
+//     const skip = (page - 1) * limit;
+
+//     let query = { draft: false };
+
+//     if (tag) {
+//       query.tags = { $regex: `^${tag}$`, $options: "i" };
+//     } else {
+//       query = {
+//         $or: [
+//           { title: { $regex: search, $options: "i" } },
+//           { description: { $regex: search, $options: "i" } },
+//         ],
+//       };
+//     }
+
+//     const blogs = await Blog.find(query)
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit)
+//       .populate({
+//         path: "creator",
+//         select: "name email followers username profilePic",
+//       });
+//     if (blogs.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "Make sure all words are spelled correctly.Try different keywords . Try more general keywords",
+//         hasMore: false,
+//       });
+//     }
+
+//     // const totalBlogs = await Blog.countDocuments(query, { draft: false });
+//     // ✅ Count total
+//     const totalBlogs = await Blog.countDocuments(query);
+
+//     return res.status(200).json({
+//       success: true,
+//       blogs,
+//       hasMore: skip + limit < totalBlogs,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// }
 
 module.exports = {
   createBlog,
