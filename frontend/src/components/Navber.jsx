@@ -111,7 +111,10 @@ function Navber() {
               <p className="popup ">Edit Profile</p>
             </Link>
             {/* <p className=" popup rounded-t-xl">Edit Profile</p> */}
-            <p className=" popup rounded-b-xl ">Setting</p>
+            <Link to={`/setting`}>
+              <p className=" popup rounded-b-xl ">Setting</p>
+            </Link>
+
             <p className=" popup rounded-b-xl  " onClick={handleLogout}>
               Logout
             </p>

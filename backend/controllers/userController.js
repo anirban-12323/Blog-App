@@ -249,7 +249,9 @@ async function login(req, res) {
       });
     }
 
-    const chekedforexitingUser = await User.findOne({ email });
+    const chekedforexitingUser = await User.findOne({ email }).select(
+      "password isVerify name email profilePic username bio showLikedBlogs showSavedBlogs followers following googleAuth",
+    );
     if (!chekedforexitingUser) {
       return res.status(400).json({
         success: false,
@@ -316,6 +318,9 @@ async function login(req, res) {
         profilepic: chekedforexitingUser.profilepic,
         username: chekedforexitingUser.username,
         bio: chekedforexitingUser.bio,
+        showLikedBlogs: chekedforexitingUser.showLikedBlogs,
+        showSavedBlogs: chekedforexitingUser.showSavedBlogs,
+
         token,
       },
     });
@@ -349,7 +354,9 @@ async function getUserBYID(req, res) {
   try {
     const username = req.params.username;
     const user = await User.findOne({ username })
-      .populate("blogs followers following  likeBlogs  saveBlogs")
+      .populate(
+        "blogs followers following  likeBlogs  saveBlogs showSavedBlogs",
+      )
       .populate({
         path: "followers  following",
         select: "name username",
@@ -515,6 +522,34 @@ async function followUsers(req, res) {
   }
 }
 
+async function updateBlogVisibilitySettings(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const { showLikedBlogs, showSavedBlogs } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(500).json({
+        message: "User not found",
+      });
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { showSavedBlogs, showLikedBlogs },
+      { new: true },
+    );
+
+    return res.status(200).json({
+      message: "Visibility updated",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   createUser,
   getUser,
@@ -525,4 +560,5 @@ module.exports = {
   verifyToken,
   googleAuth,
   followUsers,
+  updateBlogVisibilitySettings,
 };

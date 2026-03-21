@@ -9,6 +9,7 @@ import BlogPage from "./pages/BlogPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfile from "./pages/EditProfile";
 import SearchBlogs from "./pages/SearchBlogs";
+import Setting from "./components/Setting";
 
 function App() {
   return (
@@ -31,7 +32,12 @@ function App() {
         />
 
         <Route path="/:username" element={<ProfilePage />} />
+        <Route path="/:username/saved-blogs" element={<ProfilePage />} />
+        <Route path="/:username/draft-blogs" element={<ProfilePage />} />
+        <Route path="/:username/liked-blogs" element={<ProfilePage />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+
+        <Route path="/setting" element={<Setting />} />
       </Route>
 
       {/* Other routes */}

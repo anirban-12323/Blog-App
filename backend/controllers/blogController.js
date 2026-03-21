@@ -240,6 +240,7 @@ async function updateBlog(req, res) {
     }
 
     const { title, description } = req.body;
+    const draft = req.body.draft == "false" ? false : true;
     if (!title || !description || !req.body.content) {
       return res.status(400).json({
         message: "title,description and content required",
@@ -291,6 +292,7 @@ async function updateBlog(req, res) {
 
     blog.title = title;
     blog.description = description;
+    blog.draft = draft;
     blog.content = content;
     blog.image = imageUrl;
     blog.imageId = imageId;
@@ -476,8 +478,7 @@ async function searchBlog(req, res) {
     let query;
 
     if (tag) {
-      // query = { tags: tag };
-      query.tags = { $regex: `^${tag}$`, $options: "i" };
+      query = { tags: tag };
     } else {
       query = {
         $or: [
@@ -506,9 +507,11 @@ async function searchBlog(req, res) {
       hasMore: skip + limit < totalBlogs,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
+    // return res.status(500).json({
+    //   message: error.message,
+    // });
+
+    console.log(error);
   }
 }
 
