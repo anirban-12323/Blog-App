@@ -135,14 +135,14 @@ function BlogPage() {
   }, [id]);
 
   if (!blogData) return <h1 className="text-center">Loading…</h1>;
-  console.log(blogData?.creator?.username);
+
   return (
     <div className="max-w-[1100px] mx-auto px-4">
       {/* =========================
           HEADER
       ========================= */}
       <div className="max-w-2xl mx-auto">
-        <h1 className="mt-10 font-bold text-4xl leading-tight">
+        <h1 className="mt-10 font-bold text-3xl sm:text-4xl lg:text-6xl leading-tight">
           {blogData.title}
         </h1>
 

@@ -1,20 +1,27 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { updateData } from "../utils/userSlice";
+import { useEffect } from "react";
 
 function Setting() {
   const { token, showLikedBlogs, showSavedBlogs } = useSelector(
     (state) => state.user,
   );
+
   const [data, setData] = useState({
     showSavedBlogs,
     showLikedBlogs,
   });
+  useEffect(() => {
+    setData({ showSavedBlogs, showLikedBlogs });
+  }, [showSavedBlogs, showLikedBlogs]);
+
+  const dispatch = useDispatch();
 
   async function handleVisibility() {
     try {
-      console.log("running");
       let res = await axios.patch(
         `${import.meta.env.VITE_BACKEND_URL}/settings/blog-visibility`,
         data,
@@ -25,10 +32,34 @@ function Setting() {
           },
         },
       );
+      dispatch(updateData(data));
       toast.success(res.data.message);
     } catch (error) {}
   }
-  return (
+
+  useEffect(() => {
+    async function getBlogVisibility() {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/settings/blog-visibility`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        dispatch(updateData(res.data)); // 👈 THIS is missing
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    getBlogVisibility();
+  }, []);
+  return token == null ? (
+    <Navigate to={"/signin"} />
+  ) : (
     <div className="w-full p-5 md:w-[800px] flex flex-col items-center h-[calc(100vh_-_250px)] mx-auto justify-center">
       <div className="w-full">
         <h2 className="my-10 text-2xl font-semibold text-left">Settings</h2>

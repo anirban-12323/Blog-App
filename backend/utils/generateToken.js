@@ -1,8 +1,5 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config()
-
-
-const JWT_SECRET=process.env.JWT_SECRET
+const { JWT_SECRET } = require("../config/dotenv.config");
 
 async function generateJWT(payload) {
   let token = await jwt.sign(payload, JWT_SECRET);
@@ -12,7 +9,6 @@ async function generateJWT(payload) {
 async function verifyJWT(token) {
   try {
     let data = await jwt.verify(token, JWT_SECRET);
-    
 
     return data;
   } catch (err) {

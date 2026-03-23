@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -293,7 +293,9 @@ const AddBlog = () => {
     }
   }, [editor, blogData]);
 
-  return (
+  return token == null ? (
+    <Navigate to={"/signin"} />
+  ) : (
     <div className="min-h-screen flex justify-center pt-10 bg-gray-50">
       <div className="w-[500px] lg:w-[1000px] mx-auto bg-white rounded-xl shadow-md p-6">
         <h2 className="text-2xl font-bold mb-6 text-center">
@@ -441,7 +443,15 @@ const AddBlog = () => {
 
         <button
           onClick={id ? handleUpdateBlog : handlePostBlog}
-          className="w-[20%] mx-auto bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+          className="
+w-full sm:w-auto
+mx-auto
+bg-blue-600 hover:bg-blue-700
+text-white
+px-4 py-2
+text-sm sm:text-base
+rounded-lg
+"
         >
           {blogData.draft ? "Save as Draft" : id ? "Update Blog" : "Post Blog"}
         </button>

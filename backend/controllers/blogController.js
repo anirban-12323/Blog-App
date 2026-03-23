@@ -47,14 +47,6 @@ async function createBlog(req, res) {
       });
     }
 
-    // 🧾 PARSE TIPTAP CONTENT  (TEXT ONLY)
-
-    // try {
-    //   content = JSON.parse(req.body.content);
-    // } catch (error) {
-    //   console.log(error);
-    // }
-
     // 🖼️ COVER IMAGE (SINGLE FILE)
     const coverImage = req.file;
 
@@ -103,7 +95,6 @@ async function createBlog(req, res) {
     });
 
     if (draft) {
-      console.log(draft);
       return res.status(200).json({
         message: "Blog save as draft.You can public it from your profile",
       });
@@ -208,7 +199,9 @@ async function getBlog(req, res) {
       comments,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 }
 
@@ -226,9 +219,8 @@ async function updateBlog(req, res) {
     }
 
     //find the blog using blogId
-    console.log("Searching for blog..");
+
     const blog = await Blog.findOne({ blogId });
-    console.log(blog);
 
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
@@ -393,7 +385,6 @@ async function dislikeBlog(req, res) {
 async function deleteBlog(req, res) {
   try {
     const creator = req.user;
-    console.log("Creator:", creator);
 
     const { id } = req.params;
 
@@ -422,8 +413,6 @@ async function deleteBlog(req, res) {
       message: "Blog deleted successfully",
     });
   } catch (error) {
-    console.log("DELETE ERROR:", error.message);
-
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -507,11 +496,9 @@ async function searchBlog(req, res) {
       hasMore: skip + limit < totalBlogs,
     });
   } catch (error) {
-    // return res.status(500).json({
-    //   message: error.message,
-    // });
-
-    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 }
 

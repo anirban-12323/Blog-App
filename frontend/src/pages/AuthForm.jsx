@@ -55,7 +55,6 @@ function AuthForm({ type }) {
         userData,
       );
       if (type == "signup") {
-        // console.log(res.data.message);
         toast.success(res.data.message);
         navigate("/signin");
       } else {
@@ -135,6 +134,7 @@ function AuthForm({ type }) {
             setUserData={setUserData}
             field={"email"}
             value={userData.email}
+            className="w-full px-4 py-2 pr-10 border rounded-md outline-none"
           />
           {/* Password input */}
 

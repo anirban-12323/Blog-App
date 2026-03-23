@@ -12,6 +12,7 @@ const {
   googleAuth,
   followUsers,
   updateBlogVisibilitySettings,
+  getBlogVisibility,
 } = require("../controllers/userController");
 const verifyUser = require("../middlewares/auth");
 const route = express.Router();
@@ -36,5 +37,7 @@ route.patch(
   verifyUser,
   updateBlogVisibilitySettings,
 );
+
+route.get("/settings/blog-visibility", verifyUser, getBlogVisibility);
 
 module.exports = route;

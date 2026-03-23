@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { login } from "../utils/userSlice";
+import { Navigate } from "react-router-dom";
 
 const EditProfile = () => {
   const {
@@ -68,12 +69,7 @@ const EditProfile = () => {
       toast.success(res.data.message);
       dispatch(login({ ...res.data.user, email, token, id: userId }));
     } catch (error) {
-      console.log(error);
-      // toast.error(
-      //   error?.response?.data?.message ||
-      //     error?.message ||
-      //     "Something went wrong",
-      // );
+      toast.error(error.response.data.message);
     }
   }
 
@@ -83,11 +79,16 @@ const EditProfile = () => {
       setIsDisableButton(isEqual);
     }
   }, [userData, initialData]);
-  // console.log(userData);
-  return (
+
+  return token == null ? (
+    <Navigate to={"/signin"} />
+  ) : (
     <div className="w-full ">
-      <div className="w-[30%] border px-10 mx-auto">
-        <h1 className="text-center">Edit Profile</h1>
+      <div
+        className="w-full sm:w-[70%] md:w-[50%] lg:w-[35%]  border 
+  px-4 sm:px-6 md:px-10  mx-auto mt-4"
+      >
+        <h1 className="text-center text-3xl font-semibold">Edit Profile</h1>
         <div>
           {/* Cover Image */}
           <div className="mb-2">
@@ -177,7 +178,13 @@ const EditProfile = () => {
           </div>
           <button
             disabled={isDisableButton}
-            className={` rounded-full px-7 py-3 my-3 text-white  ${isDisableButton ? "bg-green-300" : "bg-green-600"}`}
+            className={` w-full sm:w-auto
+rounded-full 
+px-4 py-2 
+sm:px-6 sm:py-3
+my-3 
+text-sm sm:text-base
+text-white  ${isDisableButton ? "bg-green-300" : "bg-green-600"}`}
             onClick={handleUpdateProfile}
           >
             Update

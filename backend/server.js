@@ -1,43 +1,33 @@
-const express=require("express")
-const mongoose=require("mongoose")
-const cors=require("cors")
-const dbConect = require("./config/dbConnect")
-const cloudinaryConfig=require("./config/cloudinaryConfig")
-const app=express()
-const userRoute=require("./routes/userRoutes")
-const blogRoute=require("./routes/blogRoutes")
-const commentRoute=require("./routes/commentRoutes")
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const dbConect = require("./config/dbConnect");
+const cloudinaryConfig = require("./config/cloudinaryConfig");
+const app = express();
+const userRoute = require("./routes/userRoutes");
+const blogRoute = require("./routes/blogRoutes");
+const commentRoute = require("./routes/commentRoutes");
+const { PORT, FRONTEND_URL } = require("./config/dotenv.config");
 
-require("dotenv").config()
-const PORT=process.env.PORT
-
-
-
+const port = PORT;
 
 //anirbanguharoy82_db_user
 //hIMRYw8OSzj1K7PY
 
-app.use(express.json())
-app.use(cors())
-app.use("/api/v1",userRoute)
-app.use("/api/v1",blogRoute)
-app.use("/api/v1",commentRoute)
+app.use(express.json());
+app.use(cors({ origin: FRONTEND_URL }));
+app.use("/api/v1", userRoute);
+app.use("/api/v1", blogRoute);
+app.use("/api/v1", commentRoute);
 
+app.get("/", (req, res) => {
+  res.send("hello ji kya haal");
+});
 
-
-
-
-
-
-//BLOG ROUTES
-
-
-
-app.listen(PORT,()=>{
-  console.log("Server started")
-  dbConect()
-  cloudinaryConfig()
-})
-
+app.listen(port, () => {
+  console.log("Server started");
+  dbConect();
+  cloudinaryConfig();
+});
 
 //

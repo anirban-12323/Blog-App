@@ -44,7 +44,6 @@ async function addComment(req, res) {
 
 async function getCommentsByBlog(req, res) {
   try {
-    console.log("getCommentsByBlog running");
     const { blogId } = req.params;
 
     //FIND BLOG USING SLUG
@@ -102,11 +101,9 @@ async function likesComment(req, res) {
       likesCount: comment.likes.length,
     });
   } catch (error) {
-    // res.status(500).json({
-    //   message: "Failed to like comment",
-    // });
-
-    console.log(error);
+    res.status(500).json({
+      message: "Failed to like comment",
+    });
   }
 }
 
@@ -150,7 +147,10 @@ async function editComment(req, res) {
       updatedComment,
     });
   } catch (error) {
-    console.log(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 }
 
@@ -213,7 +213,6 @@ async function getCommentCount(req, res) {
     return res.status(500).json({
       message: error.message,
     });
-    //console.log(error);
   }
 }
 

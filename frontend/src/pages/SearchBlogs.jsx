@@ -8,7 +8,6 @@ const SearchBlogs = () => {
   const [searchParams] = useSearchParams();
   const q = searchParams.get("q");
   const { tag } = useParams();
-  console.log(tag);
 
   const [page, setPage] = useState(1);
   const query = tag
@@ -23,7 +22,7 @@ const SearchBlogs = () => {
     setPage(1);
   }, [q]);
   return (
-    <div className="w-[60%] mx-auto">
+    <div className="w-full p-5 sm:w-[80%] md:w-[60%] lg:w-[55%] mx-auto">
       <h1 className=" my-10 text-4xl text-gray-500 font-bold">
         Results for <span className="text-black">{tag ? tag : q}</span>
       </h1>

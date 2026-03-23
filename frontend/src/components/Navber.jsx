@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { logout } from "../utils/userSlice";
 import { useEffect } from "react";
+import { useRef } from "react";
 
 function Navber() {
   const { token } = useSelector((state) => state.user);
@@ -17,6 +18,9 @@ function Navber() {
 
   const [showPopup, setShowPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState(null);
+
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const popupRef = useRef();
 
   const handleWriteClick = () => {
     navigate("/add-blog");
@@ -37,20 +41,34 @@ function Navber() {
       setShowPopup(false);
     }
   }, [window.location.pathname]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        setShowPopup(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     <>
-      <div className="bg-white max-w-full flex justify-between  relative items-center h-[60px] px-10 border-b drop-shadow-sm">
-        <div className="flex justify-between gap-4 items-center">
+      <div className="bg-white max-w-full flex justify-between  items-center h-[70px] px-2 sm:px-[30px]  border-b drop-shadow-sm">
+        <div className="flex justify-between gap-4  relative items-center">
           <Link to={"/"}>
             <div>
               <img src={logo} alt="" />
             </div>
           </Link>
-          <div className="relative w-full max-w-sm">
+          {/* <div className="relative w-full max-sm:absolute max-sm:top-16  my-2 sm:block">
             <i className="fi fi-rs-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
             <input
               type="text"
-              className="bg-gray-300 outline-none focus:outline-none  rounded-full pl-10 p-2"
+              className="bg-gray-200 outline-none focus:outline-none  max-sm:w-[calc(100vw_-_70px)]  rounded-full pl-10 p-2"
               placeholder="Search"
               value={searchQuery ? searchQuery : ""}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -62,14 +80,48 @@ function Navber() {
                 }
               }}
             />
+          </div> */}
+
+          <div
+            className={`relative w-full max-sm:absolute max-sm:top-11 max-sm:left-0 my-2 sm:block px-2 sm:px-0 ${showSearchBar ? "max-sm:block" : "max-sm:hidden"}`}
+          >
+            <i className="fi fi-rs-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+
+            <input
+              type="text"
+              className="bg-gray-100 focus:outline-none max-sm:w-[calc(100vw_-_70px)] rounded-full pl-12 p-2"
+              placeholder="Search"
+              value={searchQuery ? searchQuery : ""}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (searchQuery.trim()) {
+                    setShowSearchBar(false);
+                    if (showSearchBar) {
+                      setSearchQuery("");
+                    }
+                    navigate(`/search?q=${searchQuery.trim()}`);
+                  }
+                }
+              }}
+            />
           </div>
         </div>
         <div className="flex gap-4 justify-center items-center">
           <div className="flex gap-1 justify-center items-center ">
-            <i className="fi fi-rr-file-edit text-2xl mt-2"></i>
-            <span onClick={handleWriteClick} className="text-xl cursor-pointer">
-              Write
-            </span>
+            <i
+              className="fi fi-rs-search text-xl sm:hidden text-2xl mt-2 mr-1"
+              onClick={() => setShowSearchBar((prev) => !prev)}
+            ></i>
+            <div className="flex gap-2 items-center">
+              <i className="fi fi-rr-file-edit text-2xl mt-2"></i>
+              <span
+                onClick={handleWriteClick}
+                className="text-xl cursor-pointer"
+              >
+                Write
+              </span>
+            </div>
           </div>
 
           {token ? (
@@ -82,7 +134,10 @@ function Navber() {
                 }
                 alt=""
                 className="w-full h-full object-cover cursor-pointer"
-                onClick={() => setShowPopup((prev) => !prev)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPopup((prev) => !prev);
+                }}
               />
             </div>
           ) : (
@@ -103,7 +158,10 @@ function Navber() {
         </div>
 
         {showPopup ? (
-          <div className="w-[150px] h-[180px] bg-gray-100  drop-shadow-xl absolute right-2 top-12 rounded-xl ">
+          <div
+            ref={popupRef}
+            className="w-[150px] h-[180px] bg-gray-100 z-40 drop-shadow-xl absolute right-2 top-12 rounded-xl "
+          >
             <Link to={`/@${username}`}>
               <p className="popup rounded-t-xl">Profile</p>
             </Link>

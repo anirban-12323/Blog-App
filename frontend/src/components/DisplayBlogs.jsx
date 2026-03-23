@@ -30,7 +30,7 @@ const DisplayBlogs = ({ blogs }) => {
                     </div>
                     <div className=" flex gap-2">
                       <i className="fi fi-sr-comment-alt text-xl mt-1"></i>
-                      <p className="text-xl">{comments?.length}</p>
+                      <p className="text-xl">{blog.comments?.length}</p>
                     </div>
                     <div
                       className=" flex gap-2"

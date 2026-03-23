@@ -22,9 +22,25 @@ const ProfilePage = () => {
         <DisplayBlogs blogs={userData.blogs.filter((blog) => !blog.draft)} />
       );
     } else if (location.pathname === `/${username}/saved-blogs`) {
-      return <DisplayBlogs blogs={userData.saveBlogs} />;
+      return (
+        <>
+          {userData.showSavedBlogs || userData._id === userId ? (
+            <DisplayBlogs blogs={userData.saveBlogs} />
+          ) : (
+            <Navigate to={`/${username}`} />
+          )}
+        </>
+      );
     } else if (location.pathname === `/${username}/liked-blogs`) {
-      return <DisplayBlogs blogs={userData.likeBlogs} />;
+      return (
+        <>
+          {userData.showLikedBlogs || userData._id === userId ? (
+            <DisplayBlogs blogs={userData.saveBlogs} />
+          ) : (
+            <Navigate to={`/${username}`} />
+          )}
+        </>
+      );
     } else {
       return (
         <>
@@ -57,7 +73,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="w-full  flex justify-center">
+    <div className="w-full  flex justify-center overflow-x-hidden">
       {userData ? (
         <div className="w-[80%] flex max-lg:flex-col-reverse justify-evenly ">
           <div className=" max-lg:w-full w-[50%] ">

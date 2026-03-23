@@ -10,14 +10,32 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfile from "./pages/EditProfile";
 import SearchBlogs from "./pages/SearchBlogs";
 import Setting from "./components/Setting";
-
+import PublicRoute from "./components/PublicRoute";
 function App() {
   return (
     // <div className="bg-slate-200 w-screen h-screen ">
     <Routes>
       {/* Auth routes (no navbar) */}
-      <Route path="/signin" element={<AuthForm type={"signin"} />} />
-      <Route path="/signup" element={<AuthForm type={"signup"} />} />
+      {/* <Route path="/signin" element={<AuthForm type={"signin"} />} />
+      <Route path="/signup" element={<AuthForm type={"signup"} />} /> */}
+
+      <Route
+        path="/signin"
+        element={
+          <PublicRoute>
+            <AuthForm type={"signin"} />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/signup"
+        element={
+          <PublicRoute>
+            <AuthForm type={"signup"} />
+          </PublicRoute>
+        }
+      />
       {/* Default route (optional) */}
       <Route path="/" element={<Navber />}>
         <Route path="/" element={<HomePage></HomePage>} />

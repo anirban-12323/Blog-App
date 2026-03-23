@@ -25,7 +25,6 @@ function usePagination(path, queryParams = {}, limit = 1, page = 1) {
         setBlogs([]);
         toast.error(error.response.data.message);
         setHasMore(false);
-        console.log(error);
       }
     }
     fetchSearchBlogs();
