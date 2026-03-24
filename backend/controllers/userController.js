@@ -118,11 +118,13 @@ async function googleAuth(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Please try again",
-      error: error.message,
-    });
+    // return res.status(500).json({
+    //   success: false,
+    //   message: "Please try again",
+    //   error: error.message,
+    // });
+
+    console.log(error);
   }
 }
 

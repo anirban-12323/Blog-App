@@ -3,13 +3,12 @@ const nodemailer = require("nodemailer");
 // Create a transporter using Ethereal test credentials.
 // For production, replace with your actual SMTP server details.
 const transporter = nodemailer.createTransport({
-  EMAIL_HOST: "smtp.gmail.com",
-  EMAIL_PORT: 465,
-  secure: true, // Use true for port 465, false for port 587
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
+  secure: true,
   auth: {
-    EMAIL_USER: "anirbanguharoy82@gmail.com",
-    EMAIL_PASS: "fang ibav ddxh hfyg",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
-
 module.exports = transporter;
